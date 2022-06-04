@@ -1,5 +1,6 @@
 package com.buyern.buyern.Controllers;
 
+import com.buyern.buyern.Enums.State;
 import com.buyern.buyern.Services.HelperService;
 import com.buyern.buyern.dtos.ResponseDTO;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,11 @@ public class HelperController {
     @GetMapping("entityCategories")
     private ResponseEntity<ResponseDTO> getEntityCategories() {
         return helperService.getEntityCategories();
+    }
+
+    @GetMapping("entityCategories/presets")
+    private ResponseEntity<ResponseDTO> getEntityCategoriesPresets(@RequestParam Long categoryId) {
+        return helperService.getEntityCategoriesPresets(categoryId);
     }
 
     @GetMapping("countries")
@@ -101,6 +107,12 @@ public class HelperController {
     @GetMapping("cities/byCountryCode")
     private ResponseEntity<ResponseDTO> getCitiesByCountryCode(@RequestParam(name = "countryCode") String countryCode) {
         return helperService.getCitiesByCountryCode(countryCode);
+    }
+
+    @GetMapping("entity/states")
+    private ResponseEntity<ResponseDTO> getEntityStates() {
+        State.Entity[] entityStates = State.Entity.values();
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(entityStates).build());
     }
 
 }

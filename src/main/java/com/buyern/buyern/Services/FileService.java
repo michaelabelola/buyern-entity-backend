@@ -23,9 +23,9 @@ public class FileService {
                 .connectionString("AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1")
                 .buildClient();
         try {
-            entitiesContainerClient = blobServiceClient.createBlobContainerWithResponse("entities_templates", null, PublicAccessType.BLOB, Context.NONE).getValue();
+            entitiesContainerClient = blobServiceClient.createBlobContainerWithResponse("entities", null, PublicAccessType.BLOB, Context.NONE).getValue();
         } catch (Exception ex){
-            entitiesContainerClient = blobServiceClient.getBlobContainerClient("entities_templates");
+            entitiesContainerClient = blobServiceClient.getBlobContainerClient("entities");
         }
     }
 

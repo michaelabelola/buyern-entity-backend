@@ -38,8 +38,6 @@ public class EntityDto implements Serializable {
     private LocationDto location;
     private boolean hq;
     private EntityPreferencesDto preferences;
-    private List<AssetDto> assets;
-    private List<AssetGroupDto> assetGroups;
     @Enumerated(EnumType.STRING)
     private BuyernEntityType registererType;
     private String registererId;
@@ -63,8 +61,6 @@ public class EntityDto implements Serializable {
         entity.setLocation(getLocation().toLocation());
         entity.setHq(isHq());
         entity.setPreferences(getPreferences().toEntityPreferences());
-        entity.setAssets(new ListMapper<AssetDto, Asset>().map(getAssets(), AssetDto::toAsset));
-        entity.setAssetGroups(new ListMapper<AssetGroupDto, AssetGroup>().map(getAssetGroups(), AssetGroupDto::toAssetGroup));
         entity.setRegistererId(getRegistererType() + "/" + getRegistererId());
         entity.setTimeRegistered(getTimeRegistered());
         return entity;
@@ -89,8 +85,6 @@ public class EntityDto implements Serializable {
                 .location(LocationDto.create(entity.getLocation()))
                 .hq(entity.isHq())
                 .preferences(EntityPreferencesDto.create(entity.getPreferences()))
-                .assets(new ListMapper<Asset, AssetDto>().map(entity.getAssets(), AssetDto::create))
-                .assetGroups(new ListMapper<AssetGroup, AssetGroupDto>().map(entity.getAssetGroups(), AssetGroupDto::create))
                 .registererType(BuyernEntityType.valueOf(regId[0]))
                 .registererId(regId[1])
                 .timeRegistered(entity.getTimeRegistered())

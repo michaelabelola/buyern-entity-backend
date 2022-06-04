@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface EntityPresetRepository extends JpaRepository<EntityPreset, Long> {
-    List<EntityPreset> findAllByCategory_Id(Long categoryId);
+    List<EntityPreset> findByCategory_IdIsOrderByTool_NameAsc(Long categoryId);
 }

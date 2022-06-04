@@ -32,6 +32,7 @@ public class Entity {
     private String entityId = UUID.randomUUID().toString();
     private String name;
     private String about;
+    @Enumerated(EnumType.STRING)
     private EntityType type;
     private boolean registeredWithGovt;
     @JsonFormat(pattern = "YYYY-MM-dd")
@@ -51,15 +52,6 @@ public class Entity {
     @OneToOne(cascade = CascadeType.MERGE)
 //    @JoinColumn(name = "preferences_id")
     private EntityPreferences preferences;
-    @OneToMany(cascade = CascadeType.MERGE)
-    @ToString.Exclude
-//    @JoinTable(name = "entity_assets")
-//    @JoinColumn(name = "assets_id")
-    private List<Asset> assets;
-    @OneToMany(cascade = CascadeType.MERGE)
-    @ToString.Exclude
-//    @JoinTable(name = "entity_assets")
-    private List<AssetGroup> assetGroups;
     @Column(nullable = false)
     private String registererId;
     @CreationTimestamp

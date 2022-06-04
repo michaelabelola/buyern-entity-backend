@@ -52,26 +52,26 @@ public class InitializerController {
 
     private void createDefaultEntityPresets() {
         List<EntityPreset> entityPresets = new ArrayList<>();
-        entityPresets.add(new EntityPreset(new EntityCategory(11L), new Tool(1L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(11L), new Tool(2L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(11L), new Tool(3L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(11L), new Tool(4L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(11L), new Tool(6L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(11L), new Tool(7L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(12L), new Tool(1L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(12L), new Tool(3L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(12L), new Tool(4L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(12L), new Tool(5L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(12L), new Tool(6L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(12L), new Tool(7L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(1L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(2L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(3L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(4L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(5L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(6L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(7L)));
-        entityPresets.add(new EntityPreset(new EntityCategory(13L), new Tool(8L)));
+        entityPresets.add(new EntityPreset(new EntityCategory(11L), toolRepository.findById(1L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(11L), toolRepository.findById(2L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(11L), toolRepository.findById(3L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(11L), toolRepository.findById(4L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(11L), toolRepository.findById(6L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(11L), toolRepository.findById(7L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(12L), toolRepository.findById(1L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(12L), toolRepository.findById(3L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(12L), toolRepository.findById(4L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(12L), toolRepository.findById(5L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(12L), toolRepository.findById(6L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(12L), toolRepository.findById(7L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(1L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(2L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(3L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(4L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(5L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(6L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(7L).get()));
+        entityPresets.add(new EntityPreset(new EntityCategory(13L), toolRepository.findById(8L).get()));
         entityPresetRepository.saveAll(entityPresets);
     }
 
@@ -82,7 +82,7 @@ public class InitializerController {
         tools.add(new Tool(3L, UUID.randomUUID().toString(), "Customer Care", "improve relationship with you customers give them required help."));
         tools.add(new Tool(4L, UUID.randomUUID().toString(), "Customer Manager", "improve relationship with you customers give them required help."));
         tools.add(new Tool(5L, UUID.randomUUID().toString(), "Asset Manager", "improve relationship with you customers give them required help."));
-        tools.add(new Tool(6L, UUID.randomUUID().toString(), "Staff Manager", "improve relationship with you customers give them required help."));
+        tools.add(new Tool(6L, UUID.randomUUID().toString(), "Employee / Stakeholders Manager", "improve relationship with you customers give them required help."));
         tools.add(new Tool(7L, UUID.randomUUID().toString(), "Permissions/Role Manager", "improve relationship with you customers give them required help."));
         tools.add(new Tool(8L, UUID.randomUUID().toString(), "Delivery Manager", "improve relationship with you customers give them required help."));
         tools.add(new Tool(9L, UUID.randomUUID().toString(), "Location Manager", "improve relationship with you customers give them required help."));

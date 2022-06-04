@@ -17,7 +17,7 @@ public class EntityRegistrationStep {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
-    private String EntityId;
+    private String entityId;
     private int registrationStep;
     @CreationTimestamp
     @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")

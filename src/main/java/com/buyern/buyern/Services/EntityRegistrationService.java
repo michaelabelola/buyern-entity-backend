@@ -2,14 +2,16 @@ package com.buyern.buyern.Services;
 
 import com.azure.storage.blob.BlobClient;
 import com.buyern.buyern.Enums.BuyernEntityType;
-import com.buyern.buyern.Models.Entity;
-import com.buyern.buyern.Models.EntityPreferences;
-import com.buyern.buyern.Models.EntityRegistrationStep;
+import com.buyern.buyern.Helpers.ListMapper;
+import com.buyern.buyern.Models.*;
+import com.buyern.buyern.Repositories.EntityPresetRepository;
 import com.buyern.buyern.Repositories.EntityRegistrationStepRepository;
 import com.buyern.buyern.Repositories.EntityRepository;
 import com.buyern.buyern.dtos.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.exception.RecordNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,6 +29,8 @@ public class EntityRegistrationService {
     final FileService fileService;
     @Autowired
     EntityRegistrationStepRepository entityRegistrationStepRepository;
+    @Autowired
+    EntityPresetRepository entityPresetRepository;
 
     public EntityRegistrationService(EntityRepository entityRepository, FileService fileService) {
         this.entityRepository = entityRepository;
@@ -44,6 +49,8 @@ public class EntityRegistrationService {
     }
 
     public ResponseEntity<ResponseDTO> register1(String registererEntityId, String entityName) {
+        if (registererEntityId.isEmpty()) throw new RuntimeException("registerer not specified");
+        if (entityName.isEmpty()) throw new RuntimeException("entityName cant be empty");
         /* if registererEntityId is null then registererType is USER. get user id from header etc*/
         Entity entity = new Entity();
         entity.setName(entityName);
@@ -58,20 +65,19 @@ public class EntityRegistrationService {
     }
 
     /**
-     * <h3>Update entity registration current step count.</h3>
+     * <h3>get entity registration current step count.</h3>
      *
-     * @param entityId entity to update its step count
-     * @param step     current step count
+     * @param entityId entity
      */
-    private EntityRegistrationStep updateStep(String entityId, int step) {
+    private EntityRegistrationStep getRegistrationProgress(String entityId) {
         Optional<EntityRegistrationStep> entityRegistrationStep = entityRegistrationStepRepository.findByEntityId(entityId);
         if (entityRegistrationStep.isEmpty())
             throw new RuntimeException("Entity has already been registered or entity does not exist");
-        entityRegistrationStep.get().setRegistrationStep(step);
-        return entityRegistrationStepRepository.save(entityRegistrationStep.get());
+        else return entityRegistrationStep.get();
     }
 
     public ResponseEntity<ResponseDTO> register2(EntityDto entityDto) {
+        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getEntityId());
         Optional<Entity> entity = entityRepository.findByEntityId(entityDto.getEntityId());
         if (entity.isEmpty())
             throw new RecordNotFoundException("entity with registration id not found");
@@ -84,7 +90,8 @@ public class EntityRegistrationService {
         entity.get().setHq(entityDto.isHq());
         entity.get().setCategory(entityDto.getCategory().toEntityCategory());
         Entity entity1 = entityRepository.save(entity.get());
-        updateStep(entity1.getEntityId(), 2);
+        entityRegistrationStep.setRegistrationStep(2);
+        entityRegistrationStepRepository.save(entityRegistrationStep);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").data(EntityDto.create(entity1)).build());
     }
 
@@ -95,13 +102,15 @@ public class EntityRegistrationService {
      * @return ResponseEntity containing entityDto</h3>
      */
     public ResponseEntity<ResponseDTO> register3(EntityDto entityDto) {
+        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getEntityId());
         Entity entity = getEntity(entityDto.getEntityId());
-        if (entity.getLocation().getId() != null) {
+        if (entity.getLocation() != null) {
             entityDto.getLocation().setId(entity.getLocation().getId());
         }
         entity.setLocation(entityDto.getLocation().toLocation());
         Entity entity1 = entityRepository.save(entity);
-        updateStep(entity1.getEntityId(), 3);
+        entityRegistrationStep.setRegistrationStep(3);
+        entityRegistrationStepRepository.save(entityRegistrationStep);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity1)).build());
     }
 
@@ -113,13 +122,14 @@ public class EntityRegistrationService {
      * @param logo      entity logo. supported
      * @return ResponseEntity containing new entityDto
      */
-    public ResponseEntity<ResponseDTO> register4(String color, String colorDark, String registrationId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
+    public ResponseEntity<ResponseDTO> register4(String color, String colorDark, String entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
+        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityId);
         if (logo != null) verifyMediaType(logo.getContentType());
         if (logoDark != null) verifyMediaType(logoDark.getContentType());
         if (coverImage != null) verifyMediaType(coverImage.getContentType());
         if (coverImageDark != null) verifyMediaType(coverImageDark.getContentType());
 
-        Entity entity = getEntity(registrationId);
+        Entity entity = getEntity(entityId);
         if (entity.getPreferences() == null)
             entity.setPreferences(new EntityPreferences());
         if (color != null)
@@ -135,10 +145,16 @@ public class EntityRegistrationService {
         if (coverImageDark != null)
             entity.getPreferences().setCoverImageDark(uploadToEntityBucket(coverImageDark, entity.getEntityId(), "coverImageDark"));
         Entity entity1 = entityRepository.save(entity);
-        updateStep(entity1.getEntityId(), 4);
+        entityRegistrationStep.setRegistrationStep(3);
+        entityRegistrationStepRepository.save(entityRegistrationStep);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity1)).build());
     }
 
+    /**
+     * <h3>Verify that uploaded media type is an image</h3>
+     *
+     * @param type uploaded media type
+     */
     private void verifyMediaType(String type) {
         if (Objects.equals(type, MediaType.IMAGE_GIF_VALUE) || Objects.equals(type, MediaType.IMAGE_JPEG_VALUE) || Objects.equals(type, MediaType.IMAGE_PNG_VALUE))
             return;
@@ -183,35 +199,100 @@ public class EntityRegistrationService {
 //TODO: delete entity from entity registration step table
     }
 
-    private void initiatePermissions(String entityId) {
+    /**
+     * <h3>finalize entity registration</h3>
+     * Finalize all entity settings, activate entity, send to main server and delete from this server
+     */
+    public ResponseEntity<ResponseDTO> finalizeRegistration(String entityId) {
+        Optional<Entity> entity = entityRepository.findByEntityId(entityId);
+        if (entity.isEmpty()) throw new RecordNotFoundException("entity not found");
+        EntityCategory entityCategory = entity.get().getCategory();
+
+        List<EntityPreset> entityPresets = entityPresetRepository.findByCategory_IdIsOrderByTool_NameAsc(entityCategory.getId());
+
+        if (entityPresets.isEmpty()) throw new RecordNotFoundException("no presets available for this category");
+
+        entityPresets.forEach(entityPreset -> {
+            if (entityPreset.getTool().getId() == 1L) {
+//                finance
+                initializeFinance(entityId);
+            } else if (entityPreset.getTool().getId() == 2L) {
+//                inventory
+                initializeInventory(entityId);
+            } else if (entityPreset.getTool().getId() == 3L) {
+//                customer care
+                initializeCustomerCare(entityId);
+            } else if (entityPreset.getTool().getId() == 4L) {
+//                customer manager
+                initializeCustomerManager(entityId);
+            } else if (entityPreset.getTool().getId() == 5L) {
+//                asset manager
+                initializeAssetsManager(entityId);
+            } else if (entityPreset.getTool().getId() == 6L) {
+//                enployee manager
+                initializeStakeholdersManager(entityId);
+            } else if (entityPreset.getTool().getId() == 7L) {
+//                permissions / roles
+                initializePermissions(entityId);
+            } else if (entityPreset.getTool().getId() == 8L) {
+//                delivery
+                initializeDeliveryManager(entityId);
+            } else if (entityPreset.getTool().getId() == 9L) {
+//                location
+                initializeFinance(entityId);
+            } else if (entityPreset.getTool().getId() == 10L) {
+//                order
+                initializeOrdersManager(entityId);
+            }
+        });
+//        Optional<EntityCategory> category = entityCategoryRepository.findById(categoryId);
+//        if (category.isEmpty()) throw new RecordNotFoundException("Category doesn't exist");
+//        ObjectMapper mapper = new ObjectMapper();
+//        ObjectNode categoryObject = mapper.valueToTree(category.get());
+//        categoryObject.set("tools", mapper.valueToTree(new ListMapper<EntityPreset, Tool>().map(entityPresets, EntityPreset::getTool)));
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data("initializing").build());
+
+
+        //get entity from reg table, den get its category tools presets and create them.
+//       create asset,
+//       add asset to company assets also
+//       call asset hq, type building
+    }
+
+    private void initializePermissions(String entityId) {
 
     }
 
-    private void initiateFinance(String entityId) {
+    private void initializeFinance(String entityId) {
 
     }
 
-    private void initiateInventory(String entityId) {
+    private void initializeInventory(String entityId) {
 
     }
 
-    private void initiateCustomerCare(String entityId) {
+    private void initializeCustomerCare(String entityId) {
 
     }
 
-    private void initiateCustomerManager(String entityId) {
+    private void initializeCustomerManager(String entityId) {
 
     }
 
-    private void initiateAssetManager(String entityId) {
+    private void initializeAssetsManager(String entityId) {
 
     }
 
-    private void initiateEmployeeManager(String entityId) {
+    private void initializeStakeholdersManager(String entityId) {
 
     }
 
-    private void initiateDeliveryManager(String entityId) {
+    private void initializeDeliveryManager(String entityId) {
 
     }
+
+    private void initializeOrdersManager(String entityId) {
+
+    }
+
 }
