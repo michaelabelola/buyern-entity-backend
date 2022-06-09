@@ -1,7 +1,10 @@
 package com.buyern.buyern.Models;
 
 import com.buyern.buyern.Enums.State;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
@@ -15,17 +18,23 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
-    private String orderId;
+    @CreationTimestamp
+    @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date timePlaced;
     @Enumerated(EnumType.STRING)
     private State.Order state;
+    @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date timeCompleted;
-    private String delivererId;
+    private String delivererId;//
     private String about;
     @OneToMany(cascade = CascadeType.DETACH)
     @JoinTable(joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "content_id"))
     private List<OrderContent> contents;
-    private String handlingEntity;
-    private String location;
-    private String handler;
+    private Long handlingEntity;// entity id
+    @OneToOne
+    @JoinColumn(name = "location_id")
+    private Location location;
+    private Long handler;//user id
 }

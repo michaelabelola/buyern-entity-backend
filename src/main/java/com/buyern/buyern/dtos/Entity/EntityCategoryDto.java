@@ -1,6 +1,6 @@
-package com.buyern.buyern.dtos;
+package com.buyern.buyern.dtos.Entity;
 
-import com.buyern.buyern.Models.EntityCategory;
+import com.buyern.buyern.Models.Entity.EntityCategory;
 import lombok.Builder;
 import lombok.Data;
 

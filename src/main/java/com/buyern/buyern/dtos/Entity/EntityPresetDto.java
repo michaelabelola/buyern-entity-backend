@@ -1,6 +1,7 @@
-package com.buyern.buyern.dtos;
+package com.buyern.buyern.dtos.Entity;
 
-import com.buyern.buyern.Models.EntityPreset;
+import com.buyern.buyern.Models.Entity.EntityPreset;
+import com.buyern.buyern.dtos.ToolDto;
 import lombok.Builder;
 import lombok.Data;
 

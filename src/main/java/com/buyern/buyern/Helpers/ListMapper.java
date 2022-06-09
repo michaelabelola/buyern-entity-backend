@@ -17,7 +17,7 @@ public class ListMapper<F, T> {
      * @return A new List
      */
     public List<T> map(List<F> fromList, Function<F, T> function) {
-        if (fromList == null) return null;
+        if (fromList == null || fromList.isEmpty()) return null;
         return fromList.stream().map(function).collect(Collectors.toList());
     }
 }

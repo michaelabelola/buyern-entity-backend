@@ -1,6 +1,6 @@
-package com.buyern.buyern.Repositories;
+package com.buyern.buyern.Repositories.Entity;
 
-import com.buyern.buyern.Models.Entity;
+import com.buyern.buyern.Models.Entity.Entity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +13,4 @@ public interface EntityRepository extends JpaRepository<Entity, Long> {
     List<Entity> findAll();
     Optional<Entity> findByRegistererId(String id);
     Optional<Entity> findByParentId(String id);
-    Optional<Entity> findByEntityId(String id);
-
 }

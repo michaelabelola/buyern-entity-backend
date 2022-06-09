@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -12,7 +13,7 @@ public class AssetTypeDto implements Serializable {
     private Long id;
     private String name;
     private String typeGroup;
-    private String entityId;
+    private UUID entityId;
 
     public AssetType toAssetType() {
         AssetType assetType = new AssetType();

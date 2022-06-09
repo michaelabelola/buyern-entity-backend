@@ -1,5 +1,6 @@
-package com.buyern.buyern.Models;
+package com.buyern.buyern.Models.Entity;
 
+import com.buyern.buyern.Models.Tool;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

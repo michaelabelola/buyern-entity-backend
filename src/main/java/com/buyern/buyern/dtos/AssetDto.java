@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 public class AssetDto implements Serializable {
     private String id;
-    private String entityId;
+    private Long entityId;
     private AssetTypeDto type;
     private String assignee;
     private String manager;
@@ -25,7 +25,6 @@ public class AssetDto implements Serializable {
         Asset asset = new Asset();
         asset.setId(getId());
         asset.setEntityId(getEntityId());
-        asset.setAssetId(getAssetId());
         asset.setType(getType().toAssetType());
         asset.setAssignee(getAssignee());
         asset.setManager(getManager());
@@ -41,7 +40,6 @@ public class AssetDto implements Serializable {
         return AssetDto.builder()
                 .id(asset.getId())
                 .entityId(asset.getEntityId())
-                .assetId(asset.getAssetId())
                 .type(AssetTypeDto.create(asset.getType()))
                 .assignee(asset.getAssignee())
                 .manager(asset.getManager())

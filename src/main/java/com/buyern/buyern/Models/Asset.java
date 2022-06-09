@@ -13,9 +13,7 @@ public class Asset {
     @Id
     @Column(nullable = false, unique = true)
     private String id;
-    private String entityId;
-    @Column(unique = true)
-    private String assetId = UUID.randomUUID().toString();
+    private Long entityId;
     @OneToOne(cascade = CascadeType.DETACH)
 //    @JoinColumn(name = "type_id")
     private AssetType type;

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
+import java.util.UUID;
 
 @Entity(name = "asset_types")
 @Data
@@ -21,5 +22,5 @@ public class AssetType {
     private String name;
     //VEHICLE, BUILDING
     private String typeGroup;
-    private String entityId;
+    private UUID entityId;
 }

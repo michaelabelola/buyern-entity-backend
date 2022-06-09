@@ -2,11 +2,9 @@ package com.buyern.buyern.Controllers;
 
 import com.azure.core.annotation.BodyParam;
 import com.azure.core.annotation.QueryParam;
-import com.buyern.buyern.Repositories.EntityPresetRepository;
 import com.buyern.buyern.Services.EntityRegistrationService;
-import com.buyern.buyern.dtos.EntityDto;
+import com.buyern.buyern.dtos.Entity.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -46,7 +44,7 @@ public class EntityRegistrationController {
 
     @PostMapping("registration/step4")
     private ResponseEntity<ResponseDTO> register4(@Nullable @BodyParam("color") String color, @Nullable @BodyParam("colorDark") String colorDark,
-                                                  @BodyParam("entityId") String entityId, @Nullable @ModelAttribute MultipartFile logo,
+                                                  @BodyParam("entityId") Long entityId, @Nullable @ModelAttribute MultipartFile logo,
                                                   @Nullable @ModelAttribute MultipartFile logoDark, @Nullable @ModelAttribute MultipartFile coverImage,
                                                   @Nullable @ModelAttribute MultipartFile coverImageDark) {
 //       preferences
@@ -54,7 +52,7 @@ public class EntityRegistrationController {
     }
 
     @PostMapping("registration/finalize")
-    private ResponseEntity<ResponseDTO> finalizeRegistration(String entityId) {
+    private ResponseEntity<ResponseDTO> finalizeRegistration(Long entityId) {
         return entityRegistrationService.finalizeRegistration(entityId);
     }
 

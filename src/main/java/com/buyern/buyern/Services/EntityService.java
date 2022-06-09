@@ -1,8 +1,8 @@
 package com.buyern.buyern.Services;
 
-import com.buyern.buyern.Models.Entity;
-import com.buyern.buyern.Repositories.EntityRepository;
-import com.buyern.buyern.dtos.EntityDto;
+import com.buyern.buyern.Models.Entity.Entity;
+import com.buyern.buyern.Repositories.Entity.EntityRepository;
+import com.buyern.buyern.dtos.Entity.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.exception.RecordNotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +18,9 @@ public class EntityService {
         this.entityRepository = entityRepository;
     }
 
-    public ResponseEntity<ResponseDTO> getEntityByEntityId(String entityId) {
-        Optional<Entity> entity = entityRepository.findByEntityId(entityId);
+    public ResponseEntity<ResponseDTO> getEntityById(Long entityId) {
+        System.out.println(entityId.toString());
+        Optional<Entity> entity = entityRepository.findById(entityId);
         if (entity.isEmpty())
             throw new RecordNotFoundException("Entity does not exist");
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity.get())).build());

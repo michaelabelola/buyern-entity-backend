@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("entity/{entityId}")
 public class EntityController {
@@ -19,8 +21,8 @@ public class EntityController {
     }
 
     @GetMapping()
-    private ResponseEntity<ResponseDTO> getEntity(@PathVariable String entityId) {
-        return entityService.getEntityByEntityId(entityId);
+    private ResponseEntity<ResponseDTO> getEntity(@PathVariable Long entityId) {
+        return entityService.getEntityById(entityId);
     }
 
     private ResponseEntity<ResponseDTO> editEntity() {

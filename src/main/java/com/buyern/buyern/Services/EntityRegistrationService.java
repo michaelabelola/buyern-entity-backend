@@ -2,16 +2,13 @@ package com.buyern.buyern.Services;
 
 import com.azure.storage.blob.BlobClient;
 import com.buyern.buyern.Enums.BuyernEntityType;
-import com.buyern.buyern.Helpers.ListMapper;
-import com.buyern.buyern.Models.*;
-import com.buyern.buyern.Repositories.EntityPresetRepository;
-import com.buyern.buyern.Repositories.EntityRegistrationStepRepository;
-import com.buyern.buyern.Repositories.EntityRepository;
-import com.buyern.buyern.dtos.EntityDto;
+import com.buyern.buyern.Models.Entity.*;
+import com.buyern.buyern.Repositories.Entity.EntityPresetRepository;
+import com.buyern.buyern.Repositories.Entity.EntityRegistrationStepRepository;
+import com.buyern.buyern.Repositories.Entity.EntityRepository;
+import com.buyern.buyern.dtos.Entity.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.exception.RecordNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +38,7 @@ public class EntityRegistrationService {
         Optional<Entity> entity = switch (by) {
             case "REGISTERER_ID" -> entityRepository.findByRegistererId(BuyernEntityType.BUSINESS + "/" + value);
             case "PARENT_ID" -> entityRepository.findByParentId(value);
-            default -> entityRepository.findByEntityId(value);
+            default -> Optional.empty();
         };
         if (entity.isEmpty())
             throw new RecordNotFoundException("Entity does not exist");
@@ -58,7 +55,7 @@ public class EntityRegistrationService {
 //        entity.setParentId();
         EntityDto entityDto = EntityDto.create(entityRepository.save(entity));
         EntityRegistrationStep entityRegistrationStep = new EntityRegistrationStep();
-        entityRegistrationStep.setEntityId(entityDto.getEntityId());
+        entityRegistrationStep.setEntityId(entityDto.getId());
         entityRegistrationStep.setRegistrationStep(1);
         entityRegistrationStepRepository.save(entityRegistrationStep);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").data(entityDto).build());
@@ -69,7 +66,7 @@ public class EntityRegistrationService {
      *
      * @param entityId entity
      */
-    private EntityRegistrationStep getRegistrationProgress(String entityId) {
+    private EntityRegistrationStep getRegistrationProgress(Long entityId) {
         Optional<EntityRegistrationStep> entityRegistrationStep = entityRegistrationStepRepository.findByEntityId(entityId);
         if (entityRegistrationStep.isEmpty())
             throw new RuntimeException("Entity has already been registered or entity does not exist");
@@ -77,8 +74,8 @@ public class EntityRegistrationService {
     }
 
     public ResponseEntity<ResponseDTO> register2(EntityDto entityDto) {
-        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getEntityId());
-        Optional<Entity> entity = entityRepository.findByEntityId(entityDto.getEntityId());
+        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getId());
+        Optional<Entity> entity = entityRepository.findById(entityDto.getId());
         if (entity.isEmpty())
             throw new RecordNotFoundException("entity with registration id not found");
         entity.get().setAbout(entityDto.getAbout());
@@ -102,8 +99,8 @@ public class EntityRegistrationService {
      * @return ResponseEntity containing entityDto</h3>
      */
     public ResponseEntity<ResponseDTO> register3(EntityDto entityDto) {
-        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getEntityId());
-        Entity entity = getEntity(entityDto.getEntityId());
+        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getId());
+        Entity entity = getEntity(entityDto.getId());
         if (entity.getLocation() != null) {
             entityDto.getLocation().setId(entity.getLocation().getId());
         }
@@ -122,7 +119,7 @@ public class EntityRegistrationService {
      * @param logo      entity logo. supported
      * @return ResponseEntity containing new entityDto
      */
-    public ResponseEntity<ResponseDTO> register4(String color, String colorDark, String entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
+    public ResponseEntity<ResponseDTO> register4(String color, String colorDark, Long entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
         EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityId);
         if (logo != null) verifyMediaType(logo.getContentType());
         if (logoDark != null) verifyMediaType(logoDark.getContentType());
@@ -137,15 +134,15 @@ public class EntityRegistrationService {
         if (colorDark != null)
             entity.getPreferences().setColorDark(colorDark);
         if (logo != null)
-            entity.getPreferences().setLogo(uploadToEntityBucket(logo, entity.getEntityId(), "logo"));
+            entity.getPreferences().setLogo(uploadToEntityBucket(logo, entity.getId(), "logo"));
         if (logoDark != null)
-            entity.getPreferences().setLogoDark(uploadToEntityBucket(logoDark, entity.getEntityId(), "logoDark"));
+            entity.getPreferences().setLogoDark(uploadToEntityBucket(logoDark, entity.getId(), "logoDark"));
         if (coverImage != null)
-            entity.getPreferences().setCoverImage(uploadToEntityBucket(coverImage, entity.getEntityId(), "coverImage"));
+            entity.getPreferences().setCoverImage(uploadToEntityBucket(coverImage, entity.getId(), "coverImage"));
         if (coverImageDark != null)
-            entity.getPreferences().setCoverImageDark(uploadToEntityBucket(coverImageDark, entity.getEntityId(), "coverImageDark"));
+            entity.getPreferences().setCoverImageDark(uploadToEntityBucket(coverImageDark, entity.getId(), "coverImageDark"));
         Entity entity1 = entityRepository.save(entity);
-        entityRegistrationStep.setRegistrationStep(3);
+        entityRegistrationStep.setRegistrationStep(4);
         entityRegistrationStepRepository.save(entityRegistrationStep);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity1)).build());
     }
@@ -161,7 +158,7 @@ public class EntityRegistrationService {
         throw new IllegalArgumentException("Unsupported Image Format: only " + MediaType.IMAGE_JPEG_VALUE + ", " + MediaType.IMAGE_PNG_VALUE + " and " + MediaType.IMAGE_GIF_VALUE + " are supported");
     }
 
-    private String uploadToEntityBucket(MultipartFile file, String entityId, String newName) {
+    private String uploadToEntityBucket(MultipartFile file, Long entityId, String newName) {
         try {
             String[] name = Objects.requireNonNull(file.getContentType()).split("/");
             BlobClient blobClient = fileService.blobClient(fileService.entitiesContainerClient, entityId + "/" + newName + "." + name[name.length - 1]);
@@ -179,11 +176,11 @@ public class EntityRegistrationService {
     /**
      * <h3>Register Entity Location</h3>
      *
-     * @param entityId entity's unique UUID
+     * @param entityId entity's unique Long
      * @return Entity
      */
-    public Entity getEntity(String entityId) {
-        Optional<Entity> entity = entityRepository.findByEntityId(entityId);
+    public Entity getEntity(Long entityId) {
+        Optional<Entity> entity = entityRepository.findById(entityId);
         if (entity.isEmpty())
             throw new RecordNotFoundException("entity with registration id not found");
         return entity.get();
@@ -203,8 +200,8 @@ public class EntityRegistrationService {
      * <h3>finalize entity registration</h3>
      * Finalize all entity settings, activate entity, send to main server and delete from this server
      */
-    public ResponseEntity<ResponseDTO> finalizeRegistration(String entityId) {
-        Optional<Entity> entity = entityRepository.findByEntityId(entityId);
+    public ResponseEntity<ResponseDTO> finalizeRegistration(Long entityId) {
+        Optional<Entity> entity = entityRepository.findById(entityId);
         if (entity.isEmpty()) throw new RecordNotFoundException("entity not found");
         EntityCategory entityCategory = entity.get().getCategory();
 
@@ -229,7 +226,7 @@ public class EntityRegistrationService {
 //                asset manager
                 initializeAssetsManager(entityId);
             } else if (entityPreset.getTool().getId() == 6L) {
-//                enployee manager
+//                employee manager
                 initializeStakeholdersManager(entityId);
             } else if (entityPreset.getTool().getId() == 7L) {
 //                permissions / roles
@@ -259,39 +256,39 @@ public class EntityRegistrationService {
 //       call asset hq, type building
     }
 
-    private void initializePermissions(String entityId) {
+    private void initializePermissions(Long entityId) {
 
     }
 
-    private void initializeFinance(String entityId) {
+    private void initializeFinance(Long entityId) {
+        //TODO:initialize on the finance server
+    }
+
+    private void initializeInventory(Long entityId) {
 
     }
 
-    private void initializeInventory(String entityId) {
+    private void initializeCustomerCare(Long entityId) {
 
     }
 
-    private void initializeCustomerCare(String entityId) {
+    private void initializeCustomerManager(Long entityId) {
 
     }
 
-    private void initializeCustomerManager(String entityId) {
+    private void initializeAssetsManager(Long entityId) {
 
     }
 
-    private void initializeAssetsManager(String entityId) {
+    private void initializeStakeholdersManager(Long entityId) {
 
     }
 
-    private void initializeStakeholdersManager(String entityId) {
+    private void initializeDeliveryManager(Long entityId) {
 
     }
 
-    private void initializeDeliveryManager(String entityId) {
-
-    }
-
-    private void initializeOrdersManager(String entityId) {
+    private void initializeOrdersManager(Long entityId) {
 
     }
 

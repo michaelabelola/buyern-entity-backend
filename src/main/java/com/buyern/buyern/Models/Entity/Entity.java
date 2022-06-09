@@ -1,7 +1,8 @@
-package com.buyern.buyern.Models;
+package com.buyern.buyern.Models.Entity;
 
 import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Enums.State;
+import com.buyern.buyern.Models.Location;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @javax.persistence.Entity
 @Table(name = "entities")
@@ -25,11 +23,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class Entity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
-    @Column(nullable = false)
-    private String entityId = UUID.randomUUID().toString();
     private String name;
     private String about;
     @Enumerated(EnumType.STRING)
@@ -42,7 +38,7 @@ public class Entity {
     @OneToOne(cascade = CascadeType.DETACH)
 //    @JoinColumn(name = "category_id")
     private EntityCategory category;
-    private String parentId;
+    private Long parentId;
     private String email;
     private String phone;
     @OneToOne(cascade = CascadeType.MERGE)
@@ -56,7 +52,6 @@ public class Entity {
     private String registererId;
     @CreationTimestamp
     @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")
-    private Date timeRegistered;
 
     @Override
     public boolean equals(Object o) {

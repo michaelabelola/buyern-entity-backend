@@ -3,24 +3,24 @@ package com.buyern.buyern.Services;
 import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Helpers.ListMapper;
 import com.buyern.buyern.Models.*;
+import com.buyern.buyern.Models.Entity.EntityCategory;
+import com.buyern.buyern.Models.Entity.EntityPreset;
 import com.buyern.buyern.Repositories.*;
+import com.buyern.buyern.Repositories.Entity.EntityCategoryRepository;
+import com.buyern.buyern.Repositories.Entity.EntityPresetRepository;
 import com.buyern.buyern.dtos.AssetTypeDto;
-import com.buyern.buyern.dtos.EntityCategoryDto;
+import com.buyern.buyern.dtos.Entity.EntityCategoryDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.exception.RecordNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.RawValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service

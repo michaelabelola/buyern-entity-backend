@@ -18,7 +18,6 @@ public class Tool {
     @Column(nullable = false)
     private Long id;
     @Column(unique = true)
-    private String toolId = UUID.randomUUID().toString();
     private String name;
     private String about;
 

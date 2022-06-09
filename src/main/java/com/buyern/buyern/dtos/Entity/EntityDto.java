@@ -1,12 +1,10 @@
-package com.buyern.buyern.dtos;
+package com.buyern.buyern.dtos.Entity;
 
 import com.buyern.buyern.Enums.BuyernEntityType;
 import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Enums.State;
-import com.buyern.buyern.Helpers.ListMapper;
-import com.buyern.buyern.Models.Asset;
-import com.buyern.buyern.Models.AssetGroup;
-import com.buyern.buyern.Models.Entity;
+import com.buyern.buyern.Models.Entity.Entity;
+import com.buyern.buyern.dtos.LocationDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
@@ -16,14 +14,11 @@ import javax.persistence.Enumerated;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Builder
 public class EntityDto implements Serializable {
     private Long id;
-    private String entityId;
-//    private int registrationStep;
     private String name;
     private String about;
     private EntityType type;
@@ -32,7 +27,7 @@ public class EntityDto implements Serializable {
     private LocalDate dateEstablished;
     private State.Entity state;
     private EntityCategoryDto category;
-    private String parentId;
+    private Long parentId;
     private String email;
     private String phone;
     private LocationDto location;
@@ -46,8 +41,6 @@ public class EntityDto implements Serializable {
     public Entity toEntity() {
         Entity entity = new Entity();
         entity.setId(getId());
-        entity.setEntityId(getEntityId());
-//        entity.setRegistrationStep(getRegistrationStep());
         entity.setName(getName());
         entity.setAbout(getAbout());
         entity.setType(getType());
@@ -62,7 +55,6 @@ public class EntityDto implements Serializable {
         entity.setHq(isHq());
         entity.setPreferences(getPreferences().toEntityPreferences());
         entity.setRegistererId(getRegistererType() + "/" + getRegistererId());
-        entity.setTimeRegistered(getTimeRegistered());
         return entity;
     }
 
@@ -70,8 +62,6 @@ public class EntityDto implements Serializable {
         String[] regId = entity.getRegistererId().split("/");
         return EntityDto.builder()
                 .id(entity.getId())
-                .entityId(entity.getEntityId())
-//                .registrationStep(entity.getRegistrationStep())
                 .name(entity.getName())
                 .about(entity.getAbout())
                 .type(entity.getType())
@@ -87,7 +77,6 @@ public class EntityDto implements Serializable {
                 .preferences(EntityPreferencesDto.create(entity.getPreferences()))
                 .registererType(BuyernEntityType.valueOf(regId[0]))
                 .registererId(regId[1])
-                .timeRegistered(entity.getTimeRegistered())
                 .build();
 
     }

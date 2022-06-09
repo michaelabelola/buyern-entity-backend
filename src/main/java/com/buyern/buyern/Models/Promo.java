@@ -2,27 +2,23 @@ package com.buyern.buyern.Models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
 import java.util.Date;
 
 @Entity
+@Table(name = "promos")
 @Data
-@RequiredArgsConstructor
-public class EntityRegistrationStep {
+public class Promo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
     private Long id;
-    private String entityId;
-    private int registrationStep;
-    @CreationTimestamp
+    private String name;
+    private Long entityId;
     @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")
-    private Date timeStarted;
-    @CreationTimestamp
+    private Date startDate;
     @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")
-    private Date timeCompleted;
+    private Date endDate;
+
 }
