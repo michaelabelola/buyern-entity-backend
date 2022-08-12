@@ -12,5 +12,5 @@ public interface EntityRepository extends JpaRepository<Entity, Long> {
     @Override
     List<Entity> findAll();
     Optional<Entity> findByRegistererId(String id);
-    Optional<Entity> findByParentId(String id);
+    Optional<Entity> findByParentId(Long id);
 }

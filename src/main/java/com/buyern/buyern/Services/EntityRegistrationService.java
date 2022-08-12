@@ -3,7 +3,6 @@ package com.buyern.buyern.Services;
 import com.azure.storage.blob.BlobClient;
 import com.buyern.buyern.Enums.BuyernEntityType;
 import com.buyern.buyern.Models.Entity.*;
-import com.buyern.buyern.Repositories.Entity.EntityPresetRepository;
 import com.buyern.buyern.Repositories.Entity.EntityRegistrationStepRepository;
 import com.buyern.buyern.Repositories.Entity.EntityRepository;
 import com.buyern.buyern.dtos.Entity.EntityDto;
@@ -26,15 +25,13 @@ public class EntityRegistrationService {
     final FileService fileService;
     @Autowired
     EntityRegistrationStepRepository entityRegistrationStepRepository;
-    @Autowired
-    EntityPresetRepository entityPresetRepository;
 
     public EntityRegistrationService(EntityRepository entityRepository, FileService fileService) {
         this.entityRepository = entityRepository;
         this.fileService = fileService;
     }
 
-    public ResponseEntity<ResponseDTO> getEntity(String by, String value) {
+    public ResponseEntity<ResponseDTO> getEntity(String by, Long value) {
         Optional<Entity> entity = switch (by) {
             case "REGISTERER_ID" -> entityRepository.findByRegistererId(BuyernEntityType.BUSINESS + "/" + value);
             case "PARENT_ID" -> entityRepository.findByParentId(value);
@@ -201,59 +198,14 @@ public class EntityRegistrationService {
      * Finalize all entity settings, activate entity, send to main server and delete from this server
      */
     public ResponseEntity<ResponseDTO> finalizeRegistration(Long entityId) {
-        Optional<Entity> entity = entityRepository.findById(entityId);
-        if (entity.isEmpty()) throw new RecordNotFoundException("entity not found");
-        EntityCategory entityCategory = entity.get().getCategory();
-
-        List<EntityPreset> entityPresets = entityPresetRepository.findByCategory_IdIsOrderByTool_NameAsc(entityCategory.getId());
-
-        if (entityPresets.isEmpty()) throw new RecordNotFoundException("no presets available for this category");
-
-        entityPresets.forEach(entityPreset -> {
-            if (entityPreset.getTool().getId() == 1L) {
-//                finance
-                initializeFinance(entityId);
-            } else if (entityPreset.getTool().getId() == 2L) {
-//                inventory
-                initializeInventory(entityId);
-            } else if (entityPreset.getTool().getId() == 3L) {
-//                customer care
-                initializeCustomerCare(entityId);
-            } else if (entityPreset.getTool().getId() == 4L) {
-//                customer manager
-                initializeCustomerManager(entityId);
-            } else if (entityPreset.getTool().getId() == 5L) {
-//                asset manager
-                initializeAssetsManager(entityId);
-            } else if (entityPreset.getTool().getId() == 6L) {
-//                employee manager
-                initializeStakeholdersManager(entityId);
-            } else if (entityPreset.getTool().getId() == 7L) {
-//                permissions / roles
-                initializePermissions(entityId);
-            } else if (entityPreset.getTool().getId() == 8L) {
-//                delivery
-                initializeDeliveryManager(entityId);
-            } else if (entityPreset.getTool().getId() == 9L) {
-//                location
-                initializeFinance(entityId);
-            } else if (entityPreset.getTool().getId() == 10L) {
-//                order
-                initializeOrdersManager(entityId);
-            }
-        });
+        Entity entity = entityRepository.findById(entityId).orElseThrow(() -> new RecordNotFoundException("entity not found"));
+//        EntityCategory entityCategory = entity.get().getCategory();
 //        Optional<EntityCategory> category = entityCategoryRepository.findById(categoryId);
 //        if (category.isEmpty()) throw new RecordNotFoundException("Category doesn't exist");
 //        ObjectMapper mapper = new ObjectMapper();
 //        ObjectNode categoryObject = mapper.valueToTree(category.get());
 //        categoryObject.set("tools", mapper.valueToTree(new ListMapper<EntityPreset, Tool>().map(entityPresets, EntityPreset::getTool)));
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data("initializing").build());
-
-
-        //get entity from reg table, den get its category tools presets and create them.
-//       create asset,
-//       add asset to company assets also
-//       call asset hq, type building
     }
 
     private void initializePermissions(Long entityId) {

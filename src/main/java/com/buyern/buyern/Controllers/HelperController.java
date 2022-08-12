@@ -19,16 +19,6 @@ public class HelperController {
         this.helperService = helperService;
     }
 
-    @GetMapping("assetTypes")
-    private ResponseEntity<ResponseDTO> getAssetTypes(@Nullable @RequestParam String entityId) {
-        return helperService.getAssetTypes(entityId);
-    }
-
-    @GetMapping("assetTypes/byTypeGroup")
-    private ResponseEntity<ResponseDTO> getAssetTypesByTypeGroup(@RequestParam String typeGroup) {
-        return helperService.getAssetTypesByTypeGroup(typeGroup);
-    }
-
     @GetMapping("entityTypes")
     private ResponseEntity<ResponseDTO> getEntityTypes() {
         return helperService.getEntityTypes();
@@ -39,9 +29,14 @@ public class HelperController {
         return helperService.getEntityCategories();
     }
 
-    @GetMapping("entityCategories/presets")
-    private ResponseEntity<ResponseDTO> getEntityCategoriesPresets(@RequestParam Long categoryId) {
-        return helperService.getEntityCategoriesPresets(categoryId);
+    @GetMapping("entityCategories/tools")
+    private ResponseEntity<ResponseDTO> getEntityCategoryTools(@RequestParam Long categoryId) {
+        return helperService.getEntityCategoriesItems(categoryId);
+    }
+
+    @GetMapping("tools")
+    private ResponseEntity<ResponseDTO> getTools() {
+        return helperService.getTools();
     }
 
     @GetMapping("countries")

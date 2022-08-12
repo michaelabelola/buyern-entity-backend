@@ -2,6 +2,7 @@ package com.buyern.buyern.Models;
 
 import com.buyern.buyern.Enums.BuyernEntityType;
 import com.buyern.buyern.Enums.State;
+import com.buyern.buyern.Models.Location.Location;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 public class Delivery {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
     private Long entityId;

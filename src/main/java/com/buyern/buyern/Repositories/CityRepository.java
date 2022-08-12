@@ -1,6 +1,6 @@
 package com.buyern.buyern.Repositories;
 
-import com.buyern.buyern.Models.City;
+import com.buyern.buyern.Models.Location.City;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

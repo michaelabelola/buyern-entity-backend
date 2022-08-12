@@ -2,6 +2,7 @@ package com.buyern.buyern.Models;
 
 import com.buyern.buyern.Enums.BuyernEntityType;
 import com.buyern.buyern.Enums.OrderType;
+import com.buyern.buyern.Models.Location.Location;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Data
 public class OrderContent {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 

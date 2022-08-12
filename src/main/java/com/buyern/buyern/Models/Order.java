@@ -1,10 +1,10 @@
 package com.buyern.buyern.Models;
 
 import com.buyern.buyern.Enums.State;
+import com.buyern.buyern.Models.Location.Location;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
     @CreationTimestamp

@@ -57,7 +57,7 @@ public class EntityRegistrationController {
     }
 
     @GetMapping("")
-    private ResponseEntity<ResponseDTO> getEntity(@QueryParam("by") String by, @QueryParam("value") String value) {
+    private ResponseEntity<ResponseDTO> getEntity(@QueryParam("by") String by, @QueryParam("value") Long value) {
         return entityRegistrationService.getEntity(by, value);
     }
 

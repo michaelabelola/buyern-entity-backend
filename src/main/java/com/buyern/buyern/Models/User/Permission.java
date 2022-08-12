@@ -1,4 +1,4 @@
-package com.buyern.buyern.Models;
+package com.buyern.buyern.Models.User;
 
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -6,20 +6,18 @@ import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.util.Objects;
 
-@Entity(name = "tools")
-@AllArgsConstructor
-@RequiredArgsConstructor
+@Entity(name = "permissions")
 @Getter
 @Setter
 @ToString
-public class Tool {
+@RequiredArgsConstructor
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String uid;
-    @Column(nullable = false)
     private String name;
     private String about;
 
@@ -27,8 +25,8 @@ public class Tool {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Tool tool = (Tool) o;
-        return id != null && Objects.equals(id, tool.id);
+        Permission that = (Permission) o;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override

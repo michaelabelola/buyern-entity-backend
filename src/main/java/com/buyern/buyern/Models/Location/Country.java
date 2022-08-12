@@ -1,4 +1,4 @@
-package com.buyern.buyern.Models;
+package com.buyern.buyern.Models.Location;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.Date;
 @Data
 public class Country {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, columnDefinition = "mediumint(8) NOT NULL AUTO_INCREMENT")
     private Long id;
     @Column(columnDefinition = "varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL")

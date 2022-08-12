@@ -2,76 +2,29 @@ package com.buyern.buyern.Services;
 
 import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Helpers.ListMapper;
-import com.buyern.buyern.Models.*;
 import com.buyern.buyern.Models.Entity.EntityCategory;
-import com.buyern.buyern.Models.Entity.EntityPreset;
+import com.buyern.buyern.Models.Location.City;
 import com.buyern.buyern.Repositories.*;
 import com.buyern.buyern.Repositories.Entity.EntityCategoryRepository;
-import com.buyern.buyern.Repositories.Entity.EntityPresetRepository;
-import com.buyern.buyern.dtos.AssetTypeDto;
+import com.buyern.buyern.Repositories.Entity.EntityCategoryToolsRepository;
 import com.buyern.buyern.dtos.Entity.EntityCategoryDto;
 import com.buyern.buyern.dtos.ResponseDTO;
-import com.buyern.buyern.exception.RecordNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class HelperService {
-    final AssetTypeRepository assetTypeRepository;
     final EntityCategoryRepository entityCategoryRepository;
     final CountryRepository countryRepository;
     final StateRepository stateRepository;
     final CityRepository cityRepository;
-    @Autowired
-    EntityPresetRepository entityPresetRepository;
-
-    public HelperService(AssetTypeRepository assetTypeRepository, EntityCategoryRepository entityCategoryRepository, CountryRepository countryRepository, StateRepository stateRepository, CityRepository cityRepository) {
-        this.assetTypeRepository = assetTypeRepository;
-        this.entityCategoryRepository = entityCategoryRepository;
-        this.countryRepository = countryRepository;
-        this.stateRepository = stateRepository;
-        this.cityRepository = cityRepository;
-    }
-
-    /**
-     * <h3>get all Asset Types belonging to an entity including default ones</h3>
-     *
-     * @param entityId specified entityId
-     * @return List of available entity categories
-     * @apiNote this should never return null
-     */
-    public ResponseEntity<ResponseDTO> getAssetTypes(@Nullable String entityId) {
-        if (entityId != null)
-            return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                    .data(new ListMapper<AssetType, AssetTypeDto>().map(assetTypeRepository.findByEntityIdIsNullOrEntityId(entityId), AssetTypeDto::create))
-                    .build());
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(new ListMapper<AssetType, AssetTypeDto>().map(assetTypeRepository.findByEntityIdIsNull(), AssetTypeDto::create))
-                .build());
-    }
-
-    /**
-     * <h3>get all Asset Types belonging to a particular type group</h3>
-     *
-     * @param typeGroup specified type group
-     * @return List of available entity categories
-     */
-    public ResponseEntity<ResponseDTO> getAssetTypesByTypeGroup(String typeGroup) {
-        List<AssetType> assetTypes = assetTypeRepository.findAllByTypeGroup(typeGroup);
-        if (assetTypes.isEmpty())
-            throw new RecordNotFoundException("Invalid Asset Group. No Assets has been registered under this asset group");
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(new ListMapper<AssetType, AssetTypeDto>().map(assetTypes, AssetTypeDto::create))
-                .build());
-    }
+    final EntityCategoryToolsRepository entityCategoryToolsRepository;
+    final ToolRepository toolRepository;
 
     /**
      * <h3>Entity Types</h3>
@@ -251,21 +204,11 @@ public class HelperService {
                 .build());
     }
 
-    /**
-     * <h3>Get a list of category presets</h3>
-     *
-     * @param categoryId the category id
-     * @return List of presets
-     */
-    public ResponseEntity<ResponseDTO> getEntityCategoriesPresets(Long categoryId) {
-        List<EntityPreset> entityPresets = entityPresetRepository.findByCategory_IdIsOrderByTool_NameAsc(categoryId);
-        if (entityPresets.isEmpty())
-            throw new RecordNotFoundException("no presets available for this category");
-        Optional<EntityCategory> category = entityCategoryRepository.findById(categoryId);
-        if (category.isEmpty()) throw new RecordNotFoundException("Category doesn't exist");
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode categoryObject = mapper.valueToTree(category.get());
-        categoryObject.set("tools", mapper.valueToTree(new ListMapper<EntityPreset, Tool>().map(entityPresets, EntityPreset::getTool)));
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(categoryObject).build());
+    public ResponseEntity<ResponseDTO> getEntityCategoriesItems(Long categoryId) {
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(entityCategoryToolsRepository.findByEntityCategory_Id(categoryId)).build());
+    }
+
+    public ResponseEntity<ResponseDTO> getTools() {
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(toolRepository.findAll()).build());
     }
 }

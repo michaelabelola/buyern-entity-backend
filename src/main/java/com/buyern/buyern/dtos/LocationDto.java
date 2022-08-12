@@ -1,6 +1,6 @@
 package com.buyern.buyern.dtos;
 
-import com.buyern.buyern.Models.Location;
+import com.buyern.buyern.Models.Location.Location;
 import lombok.Builder;
 import lombok.Data;
 

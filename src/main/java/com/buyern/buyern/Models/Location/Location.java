@@ -1,4 +1,4 @@
-package com.buyern.buyern.Models;
+package com.buyern.buyern.Models.Location;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Data
 public class Location {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
     private String tag;

@@ -19,6 +19,7 @@ import java.util.Date;
 @Builder
 public class EntityDto implements Serializable {
     private Long id;
+    private String entityId;
     private String name;
     private String about;
     private EntityType type;
@@ -37,10 +38,12 @@ public class EntityDto implements Serializable {
     private BuyernEntityType registererType;
     private String registererId;
     private Date timeRegistered;
+    private boolean isLive;
 
     public Entity toEntity() {
         Entity entity = new Entity();
         entity.setId(getId());
+        entity.setEntityId(getEntityId());
         entity.setName(getName());
         entity.setAbout(getAbout());
         entity.setType(getType());
@@ -55,6 +58,7 @@ public class EntityDto implements Serializable {
         entity.setHq(isHq());
         entity.setPreferences(getPreferences().toEntityPreferences());
         entity.setRegistererId(getRegistererType() + "/" + getRegistererId());
+        entity.setLive(isLive());
         return entity;
     }
 
@@ -62,6 +66,7 @@ public class EntityDto implements Serializable {
         String[] regId = entity.getRegistererId().split("/");
         return EntityDto.builder()
                 .id(entity.getId())
+                .entityId(entity.getEntityId())
                 .name(entity.getName())
                 .about(entity.getAbout())
                 .type(entity.getType())
@@ -77,6 +82,7 @@ public class EntityDto implements Serializable {
                 .preferences(EntityPreferencesDto.create(entity.getPreferences()))
                 .registererType(BuyernEntityType.valueOf(regId[0]))
                 .registererId(regId[1])
+                .isLive(entity.isLive())
                 .build();
 
     }

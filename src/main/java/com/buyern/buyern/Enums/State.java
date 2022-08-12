@@ -13,10 +13,6 @@ public class State {
         PLACED, PROCESSING, COMPLETED, ERROR, CANCELLED
     }
 
-    public enum InventoryPromo {
-        STARTED, PAUSED, RUNNING, ENDED, CANCELLED, COMPLETED
-    }
-
     public enum Delivery {
      REQUESTED, STARTED, EN_ROUTE, DELIVERED, COMPLETED
     }

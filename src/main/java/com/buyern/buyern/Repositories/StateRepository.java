@@ -1,6 +1,6 @@
 package com.buyern.buyern.Repositories;
 
-import com.buyern.buyern.Models.State;
+import com.buyern.buyern.Models.Location.State;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

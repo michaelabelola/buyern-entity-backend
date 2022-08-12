@@ -2,7 +2,7 @@ package com.buyern.buyern.Models.Entity;
 
 import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Enums.State;
-import com.buyern.buyern.Models.Location;
+import com.buyern.buyern.Models.Location.Location;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +12,10 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 @javax.persistence.Entity
 @Table(name = "entities")
@@ -21,11 +23,14 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Entity {
+public class Entity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
+    @Column(nullable = false)
+    private String entityId = UUID.randomUUID().toString();
+    @Column(nullable = false)
     private String name;
     private String about;
     @Enumerated(EnumType.STRING)
@@ -50,6 +55,8 @@ public class Entity {
     private EntityPreferences preferences;
     @Column(nullable = false)
     private String registererId;
+    private boolean isLive = false;
+
     @CreationTimestamp
     @JsonFormat(pattern = "YYYY-MM-dd HH:mm:ss")
 
