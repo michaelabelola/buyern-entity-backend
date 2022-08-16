@@ -47,18 +47,17 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse("04", ex.getMessage()), HttpStatus.CONFLICT);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        logger.error("MethodArgumentNotValidException stacktrace: {}", ex.getMessage());
-        return new ResponseEntity<>(new ErrorResponse("04", ex.getMessage(), errors), HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public final ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+//        Map<String, String> errors = new HashMap<>();
+//        ex.getBindingResult().getAllErrors().forEach((error) -> {
+//            String fieldName = ((FieldError) error).getField();
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put(fieldName, errorMessage);
+//        });
+//        logger.error("MethodArgumentNotValidException stacktrace: {}", ex.getMessage());
+//        return new ResponseEntity<>(new ErrorResponse("04", ex.getMessage(), errors), HttpStatus.BAD_REQUEST);
+//    }
 
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {

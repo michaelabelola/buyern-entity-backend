@@ -55,7 +55,7 @@ public class HelperService {
      */
     public ResponseEntity<ResponseDTO> getCountriesList() {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(countryRepository.findAll())
+                .data(countryRepository.findByOrderByNameAsc())
                 .build());
     }
 
@@ -102,7 +102,7 @@ public class HelperService {
      */
     public ResponseEntity<ResponseDTO> getStatesByCountryId(Long countryId) {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(stateRepository.findAllByCountryId(countryId))
+                .data(stateRepository.findAllByCountryIdOrderByName(countryId))
                 .build());
     }
 
@@ -163,7 +163,7 @@ public class HelperService {
      */
     public ResponseEntity<ResponseDTO> getCitiesByStateId(Long stateId) {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(cityRepository.findAllByStateId(stateId))
+                .data(cityRepository.findAllByStateIdOrderByName(stateId))
                 .build());
     }
 
@@ -175,7 +175,7 @@ public class HelperService {
      */
     public ResponseEntity<ResponseDTO> getCitiesByCountryId(Long countryId) {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(cityRepository.findAllByCountryId(countryId))
+                .data(cityRepository.findAllByCountryIdOrderByName(countryId))
                 .build());
     }
 
@@ -200,7 +200,7 @@ public class HelperService {
      */
     public ResponseEntity<ResponseDTO> getCitiesByCountryCode(String countryCode) {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(cityRepository.findAllByCountryCode(countryCode))
+                .data(cityRepository.findAllByCountryCodeOrderByName(countryCode))
                 .build());
     }
 

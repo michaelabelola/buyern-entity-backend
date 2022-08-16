@@ -63,7 +63,7 @@ public class Country {
     @Column(name = "updated_at", columnDefinition = "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Date updatedAt;
     @Column(name = "flag", columnDefinition = "tinyint(1) NOT NULL DEFAULT '1'")
-    private String flag;
+    private boolean flag;
     @Column(name = "wikiDataId", columnDefinition = "varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Rapid API GeoDB Cities'")
     private String wikiDataId;
 

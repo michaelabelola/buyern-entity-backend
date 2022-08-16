@@ -5,12 +5,10 @@ import com.buyern.buyern.Services.HelperService;
 import com.buyern.buyern.dtos.ResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("helper")
 public class HelperController {
     final HelperService helperService;
