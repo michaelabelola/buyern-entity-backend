@@ -14,7 +14,7 @@ import java.util.Date;
 public class Country {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, columnDefinition = "mediumint(8) NOT NULL AUTO_INCREMENT")
+  @Column(nullable = false, columnDefinition = "mediumint(8) NOT NULL AUTO_INCREMENT")
     private Long id;
     @Column(columnDefinition = "varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL")
     private String name;

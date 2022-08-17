@@ -25,6 +25,7 @@ public class UserService {
     public ResponseEntity<ResponseDTO> createUser(UserDto userDto) {
         User user = userDto.toModel();
         user.setId(null);
+        userRepository.ex
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userRepository.save(user)).build());
     }
 

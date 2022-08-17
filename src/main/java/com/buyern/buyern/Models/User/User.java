@@ -1,5 +1,8 @@
 package com.buyern.buyern.Models.User;
 
+import com.buyern.buyern.Models.Location.City;
+import com.buyern.buyern.Models.Location.Country;
+import com.buyern.buyern.Models.Location.State;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -31,12 +34,14 @@ public class User {
     @Column(nullable = false)
     private String address;
     private String address2;
-    @Column(nullable = false)
-    private Long state;
-    @Column(nullable = false)
-    private Long country;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @OneToOne
+    private City city;
+    @OneToOne
+    private State state;
+    @OneToOne
+    private Country country;
     @CreationTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(nullable = false)
     private Date timeRegistered;
 

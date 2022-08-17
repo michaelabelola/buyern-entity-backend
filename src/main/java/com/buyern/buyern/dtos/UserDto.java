@@ -1,9 +1,14 @@
 package com.buyern.buyern.dtos;
 
+import com.buyern.buyern.Models.Location.City;
+import com.buyern.buyern.Models.Location.Country;
+import com.buyern.buyern.Models.Location.State;
 import com.buyern.buyern.Models.User.User;
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,19 +20,21 @@ public class UserDto implements Serializable {
     private String firstName;
     @NotBlank(message = "Last name is mandatory")
     private String lastName;
-    @NotBlank(message = "email name is mandatory")
+    @NotBlank(message = "email is mandatory")
+    @Email(message = "email is mandatory")
     private String email;
-    @NotBlank(message = "phone name is mandatory")
+    @NotBlank(message = "phone is mandatory")
     private String phone;
-    @NotBlank(message = "Date of birth name is mandatory")
+    @NotNull(message = "Date of birth is mandatory")
     private Date dob;
     @NotBlank(message = "address is mandatory")
     private String address;
     private String address2;
-    @NotBlank(message = "state is mandatory")
-    private Long state;
-    @NotBlank(message = "Country is mandatory")
-    private Long country;
+    @NotNull(message = "State is mandatory")
+    private State state;
+    @NotNull(message = "Country is mandatory")
+    private Country country;
+    private City city;
     private Date timeRegistered;
 
     public User toModel(){
