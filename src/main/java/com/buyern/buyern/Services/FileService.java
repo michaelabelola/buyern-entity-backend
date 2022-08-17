@@ -6,26 +6,86 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobErrorCode;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 
 @Service
 public class FileService {
-    BlobServiceClient blobServiceClient;
-    BlobContainerClient entitiesContainerClient;
+    @Value("${storage.container.users}")
+    String usersContainerName;
+    BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+            .connectionString("AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1")
+            .buildClient();
 
-    public FileService() {
-        // Create a BlobServiceClient object which will be used to create a container client
-        blobServiceClient = new BlobServiceClientBuilder()
-                .connectionString("AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1")
-                .buildClient();
+    public BlobContainerClient getEntityContainerClient() {
         try {
-            entitiesContainerClient = blobServiceClient.createBlobContainerWithResponse("entities", null, PublicAccessType.BLOB, Context.NONE).getValue();
-        } catch (Exception ex){
-            entitiesContainerClient = blobServiceClient.getBlobContainerClient("entities");
+            return blobServiceClient.createBlobContainerWithResponse("entities", null, PublicAccessType.BLOB, Context.NONE).getValue();
+        } catch (Exception ex) {
+            return blobServiceClient.getBlobContainerClient("entities");
+        }
+    }
+
+    public BlobContainerClient getContainerClient(String containerName) {
+        //container name must be at least 3 characters long
+        if (containerName.length() == 1) containerName = "00" + containerName;
+        else if (containerName.length() == 2) containerName = "0" + containerName;
+        return blobServiceClient.getBlobContainerClient(containerName);
+    }
+
+    public BlobContainerClient createContainerClient(String containerName) {
+        //container name must be at least 3 characters long
+        if (containerName.length() == 1) containerName = "00" + containerName;
+        else if (containerName.length() == 2) containerName = "0" + containerName;
+        try {
+            return blobServiceClient.createBlobContainerWithResponse(containerName, null, PublicAccessType.CONTAINER, Context.NONE).getValue();
+        } catch (Exception ex) {
+            throw new RuntimeException("Can't create storage account for entity");
+        }
+    }
+
+    private void deleteContainer(BlobContainerClient blobContainerClient) {
+        try {
+            blobContainerClient.delete();
+            System.out.printf("Delete completed%n");
+        } catch (BlobStorageException error) {
+            if (error.getErrorCode().equals(BlobErrorCode.CONTAINER_NOT_FOUND)) {
+                System.out.printf("Delete failed. Container was not found %n");
+            }
+        }
+    }
+
+    public String upload(BlobContainerClient containerClient, MultipartFile file, String destinationFile) {
+        try {
+            BlobClient blobClient = blobClient(containerClient, destinationFile);
+            blobClient.upload(file.getInputStream(), file.getSize(), true);
+            return blobClient.getBlobUrl();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            throw new RuntimeException("can't convert file to stream");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return null;
+//            throw new RuntimeException("Error uploading to storage server");
+        }
+    }
+
+    public String upload(BlobContainerClient containerClient, File file, String destinationFile) {
+        try {
+            BlobClient blobClient = blobClient(containerClient, destinationFile);
+            blobClient.uploadFromFile(file.getPath(), true);
+            return blobClient.getBlobUrl();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+//            throw new RuntimeException("Error uploading to storage server");
         }
     }
 
@@ -66,15 +126,31 @@ public class FileService {
         return containerClient.listBlobs();
     }
 
-    public void deleteContainer(BlobContainerClient containerClient) {
-        try {
-            containerClient.delete();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+    public String uploadToUsersContainer(MultipartFile file, String destination) {
+        String uploadedFileUrl = upload(getContainerClient(usersContainerName), file, destination);
+        if (uploadedFileUrl == null)
+            return upload(createContainerClient(usersContainerName), file, destination);
+        return uploadedFileUrl;
+    }
+    public String uploadToUsersContainer(File file, String destination) {
+        String uploadedFileUrl = upload(getContainerClient(usersContainerName), file, destination);
+        if (uploadedFileUrl == null)
+            return upload(createContainerClient(usersContainerName), file, destination);
+        return uploadedFileUrl;
+    }
+    public String uploadToEntityContainer(String entityId, MultipartFile file, String destination) {
+        String uploadedFileUrl = upload(getContainerClient(entityId), file, destination);
+        if (uploadedFileUrl == null)
+            return upload(createContainerClient(usersContainerName), file, destination);
+        return uploadedFileUrl;
+    }
+    public String uploadToEntityContainer(String entityId, File file, String destination) {
+        String uploadedFileUrl = upload(getContainerClient(entityId), file, destination);
+        if (uploadedFileUrl == null)
+            return upload(createContainerClient(usersContainerName), file, destination);
+        return uploadedFileUrl;
     }
 }
-
 //    @Autowired
 //    FileService fileService;
 //    @Autowired

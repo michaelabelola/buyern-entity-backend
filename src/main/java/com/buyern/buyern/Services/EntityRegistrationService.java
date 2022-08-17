@@ -1,6 +1,5 @@
 package com.buyern.buyern.Services;
 
-import com.azure.storage.blob.BlobClient;
 import com.buyern.buyern.Enums.BuyernEntityType;
 import com.buyern.buyern.Models.Entity.*;
 import com.buyern.buyern.Repositories.Entity.EntityRegistrationStepRepository;
@@ -8,28 +7,22 @@ import com.buyern.buyern.Repositories.Entity.EntityRepository;
 import com.buyern.buyern.dtos.Entity.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.exception.RecordNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@Data
 public class EntityRegistrationService {
     final EntityRepository entityRepository;
     final FileService fileService;
-    @Autowired
-    EntityRegistrationStepRepository entityRegistrationStepRepository;
+    final EntityRegistrationStepRepository entityRegistrationStepRepository;
 
-    public EntityRegistrationService(EntityRepository entityRepository, FileService fileService) {
-        this.entityRepository = entityRepository;
-        this.fileService = fileService;
-    }
 
     public ResponseEntity<ResponseDTO> getEntity(String by, Long value) {
         Optional<Entity> entity = switch (by) {
@@ -156,18 +149,8 @@ public class EntityRegistrationService {
     }
 
     private String uploadToEntityBucket(MultipartFile file, Long entityId, String newName) {
-        try {
-            String[] name = Objects.requireNonNull(file.getContentType()).split("/");
-            BlobClient blobClient = fileService.blobClient(fileService.entitiesContainerClient, entityId + "/" + newName + "." + name[name.length - 1]);
-            blobClient.upload(file.getInputStream(), file.getSize(), true);
-            return blobClient.getBlobUrl();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-            throw new RuntimeException("cant convert file to stream");
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            throw new RuntimeException("Error uploading to storage server");
-        }
+        String[] name = Objects.requireNonNull(file.getContentType()).split("/");
+        return fileService.uploadToEntityContainer(String.valueOf(entityId), file, entityId + "/" + newName + "." + name[name.length - 1]);
     }
 
     /**

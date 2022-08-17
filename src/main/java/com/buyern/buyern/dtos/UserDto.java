@@ -31,10 +31,10 @@ public class UserDto implements Serializable {
     private String address;
     private String address2;
     @NotNull(message = "State is mandatory")
-    private State state;
+    private Long state;
     @NotNull(message = "Country is mandatory")
-    private Country country;
-    private City city;
+    private Long country;
+    private Long city;
     private Date timeRegistered;
 
     public User toModel(){

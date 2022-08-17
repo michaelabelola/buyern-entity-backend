@@ -34,12 +34,10 @@ public class User {
     @Column(nullable = false)
     private String address;
     private String address2;
-    @OneToOne
-    private City city;
-    @OneToOne
-    private State state;
-    @OneToOne
-    private Country country;
+    private Long city;
+    private Long state;
+    private Long country;
+    private String image;
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(nullable = false)

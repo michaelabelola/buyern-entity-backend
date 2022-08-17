@@ -1,5 +1,6 @@
 package com.buyern.buyern.Services;
 
+import com.buyern.buyern.Controllers.UserController;
 import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Helpers.ListMapper;
 import com.buyern.buyern.Models.Entity.EntityCategory;
@@ -10,15 +11,21 @@ import com.buyern.buyern.Repositories.Entity.EntityCategoryToolsRepository;
 import com.buyern.buyern.dtos.Entity.EntityCategoryDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class HelperService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     final EntityCategoryRepository entityCategoryRepository;
     final CountryRepository countryRepository;
     final StateRepository stateRepository;
@@ -207,8 +214,25 @@ public class HelperService {
     public ResponseEntity<ResponseDTO> getEntityCategoriesItems(Long categoryId) {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(entityCategoryToolsRepository.findByEntityCategory_Id(categoryId)).build());
     }
-
     public ResponseEntity<ResponseDTO> getTools() {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(toolRepository.findAll()).build());
+    }
+
+    /**
+     * <h3>Rename A MultipartFile And Move It To Project's Base Location. </h3>
+     * @param _file the multipart file
+     * @param newName new name to be assigned to returned file
+     * @return the new file object is returned
+     * @apiNote the File object returned has its name in the format = newName.fileExtension
+     */
+    public static File renameFile(MultipartFile _file, String newName) {
+        File file = new File(String.format("%s/%s.%s", System.getProperty("user.dir"), newName, _file.getContentType().split("/")[1]));
+        file.deleteOnExit();
+        try {
+            _file.transferTo(file);
+        } catch (IOException e) {
+            LOGGER.error("Exception Occurred while renaming files: {} ", e.getMessage());
+        }
+        return file;
     }
 }
