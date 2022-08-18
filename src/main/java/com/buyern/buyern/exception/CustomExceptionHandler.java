@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,12 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleRecordNotFoundException(RecordNotFoundException ex, WebRequest webRequest) {
 
         logger.error("RecordNotFoundException stacktrace: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorResponse("05", ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public final ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest webRequest) {
+
+        logger.error("EntityNotFoundException stacktrace: {}", ex.getMessage());
         return new ResponseEntity<>(new ErrorResponse("05", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 

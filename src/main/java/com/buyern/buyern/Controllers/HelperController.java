@@ -4,11 +4,9 @@ import com.buyern.buyern.Enums.State;
 import com.buyern.buyern.Services.HelperService;
 import com.buyern.buyern.dtos.ResponseDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("helper")
 public class HelperController {
     final HelperService helperService;

@@ -5,6 +5,7 @@ import com.buyern.buyern.Models.Location.Country;
 import com.buyern.buyern.Models.Location.State;
 import com.buyern.buyern.Models.User.User;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -37,7 +38,7 @@ public class UserDto implements Serializable {
     private Long city;
     private Date timeRegistered;
 
-    public User toModel(){
+    public User toModel() {
         User user = new User();
         user.setId(getId());
         user.setFirstName(getFirstName());
@@ -51,5 +52,12 @@ public class UserDto implements Serializable {
         user.setCountry(getCountry());
         user.setTimeRegistered(getTimeRegistered());
         return user;
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    public static class UserSignUpDTO extends UserDto {
+        @NotNull(message = "Password is mandatory")
+        private String password;
     }
 }

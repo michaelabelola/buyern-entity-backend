@@ -1,22 +1,27 @@
 package com.buyern.buyern.Models.User;
 
 import com.buyern.buyern.Enums.Role;
-import lombok.Data;
-import org.springframework.data.redis.core.RedisHash;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "user_auth")
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class UserAuth {
     @Id
     @Column(nullable = false, unique = true)
     private Long id;
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(nullable = false, unique = true)
     private String password;
+    private boolean verified = false;
+    private boolean enabled = true;
     @Enumerated(EnumType.STRING)
     private Role role;
 //    list of entity permissions : (TREE)
@@ -25,6 +30,20 @@ public class UserAuth {
             name = "user_entity_permissions",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
+    @ToString.Exclude
     private List<EntityPermission> permissions;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        UserAuth userAuth = (UserAuth) o;
+        return id != null && Objects.equals(id, userAuth.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
 }

@@ -6,9 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmailOrPhone(@Nullable String email, @Nullable String phone);
+
+    Optional<User> findByEmail(String email);
+
 
     boolean existsByEmail(String email);
 
