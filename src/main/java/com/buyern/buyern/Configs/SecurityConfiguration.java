@@ -38,10 +38,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        PasswordEncoder encoder =
-//                PasswordEncoderFactories.createDelegatingPasswordEncoder();
         auth
-                .inMemoryAuthentication().passwordEncoder(passwordEncoder())
+                .inMemoryAuthentication()
+                .passwordEncoder(passwordEncoder())
                 .and()
                 .authenticationProvider(customAuthenticationProvider);
 //                .userDetailsService(userDetailsService)
@@ -53,32 +52,31 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().disable()
                 .csrf().disable()
-                .sessionManagement().sessionFixation().changeSessionId().maximumSessions(1).maxSessionsPreventsLogin(true).and()
+                .sessionManagement().sessionFixation().newSession().maximumSessions(1).maxSessionsPreventsLogin(false).and()
                 .and()
                 .authorizeRequests()
                 .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/helper/**", "/signIn", "/signIn/**", "/signOut", "/signOut/**", "/signup", "/forgotPassword", "/resetPassword").permitAll()
+                .antMatchers("/helper/**", "/user/auth/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("/signIn/fail");
+                    response.sendRedirect("/user/auth/signIn/fail");
                 })
                 .successHandler((request, response, authentication) -> {
-                    response.sendRedirect("/signIn/success");
+                    response.sendRedirect("/user/auth/signIn/success");
                 })
-                .loginProcessingUrl("/signIn")
+                .loginProcessingUrl("/user/auth/signIn")
 //                .defaultSuccessUrl("/signIn/success")
 //                .failureUrl("/signIn/fail")
                 .and()
                 .logout()
-                .logoutUrl("/signOut")
+                .logoutUrl("/user/auth/signOut")
                 .logoutSuccessHandler((request, response, authentication) -> {
-                    response.sendRedirect("/signOut/success");
+                    response.sendRedirect("/user/auth/signOut/success");
                 })
-                .logoutSuccessUrl("/signOut/success")
+                .logoutSuccessUrl("/user/auth/signOut/success")
                 .deleteCookies("JSESSION", "SESSION")
-
                 .and().httpBasic();
 //      .antMatchers("/admin").access("hasRole('admin') and hasIpAddress('192.168.1.0/24') and @myCustomBean.checkAccess(authentication,request)")
     }

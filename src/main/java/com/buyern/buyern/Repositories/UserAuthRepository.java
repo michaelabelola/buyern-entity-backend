@@ -18,9 +18,11 @@ public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
 
     Optional<UserAuth> findByEmail(@Nullable String email);
 
+    boolean existsByEmail(String email);
+
     @Transactional
     @Modifying
-    @Query("update user_auth u set u.password = ?1 where u.email = ?2")
-    int updatePasswordByEmail(String password, String email);
+    @Query("update user_auth u set u.password = ?1 where u.id = ?2")
+    int updatePasswordById(String password, Long id);
 
 }

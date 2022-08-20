@@ -21,7 +21,10 @@ public class UserAuth {
     private String email;
     private String password;
     private boolean verified = false;
-    private boolean enabled = true;
+    private boolean disabled = false;
+    private boolean expired = false;
+    private boolean credentialExpired = false;
+    private boolean locked = false;
     @Enumerated(EnumType.STRING)
     private Role role;
 //    list of entity permissions : (TREE)
