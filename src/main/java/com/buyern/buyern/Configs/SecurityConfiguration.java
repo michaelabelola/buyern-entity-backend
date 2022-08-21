@@ -1,8 +1,10 @@
 package com.buyern.buyern.Configs;
 
+import com.buyern.buyern.Controllers.UserAuthController;
 import com.buyern.buyern.Services.CustomUserDetailsService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +12,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,17 +25,22 @@ import org.springframework.security.web.session.SessionInformationExpiredEvent;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @EqualsAndHashCode(callSuper = true)
 @Configuration
 @EnableWebSecurity
 @Data
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+    public static final org.slf4j.Logger logger = LoggerFactory.getLogger(SecurityConfiguration.class);
     final CustomAuthenticationProvider customAuthenticationProvider;
     final CustomUserDetailsService userDetailsService;
+    final CustomCorsConfigurationSource corsConfigurationSource;
+
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -50,7 +60,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().disable()
+        http
+                .cors()
+                .configurationSource(corsConfigurationSource)
+                .and()
                 .csrf().disable()
                 .sessionManagement().sessionFixation().newSession().maximumSessions(1).maxSessionsPreventsLogin(false).and()
                 .and()
@@ -64,6 +77,27 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     response.sendRedirect("/user/auth/signIn/fail");
                 })
                 .successHandler((request, response, authentication) -> {
+//                    logger.error("*******************************");
+//                    if (request.getHeaders("Set-Cookie").hasMoreElements())
+//                    logger.error(request.getHeaders("Set-Cookie").nextElement());
+//
+//                    for (Cookie cookie : request.getCookies()) {
+//                        if (cookie.getName() == "SESSION"){
+//                            cookie.setMaxAge(3000);
+//                        }
+//                        logger.error(cookie.getName());
+//                        logger.error(cookie.getComment());
+//                        logger.error(cookie.getDomain());
+//                        logger.error(cookie.getPath());
+//                        logger.error(cookie.getValue());
+//                        logger.error(String.valueOf(cookie.getMaxAge()));
+//                        logger.error(String.valueOf(cookie.getSecure()));
+//                    }request.getCookies().
+//                    logger.error("*******************************");
+//                    Cookie c = new Cookie("custom cookie", "omoweyrey");
+//                    c.setComment("test");
+//                    c.setMaxAge(3600);
+//                    response.addCookie(c);
                     response.sendRedirect("/user/auth/signIn/success");
                 })
                 .loginProcessingUrl("/user/auth/signIn")

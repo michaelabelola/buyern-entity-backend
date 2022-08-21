@@ -13,6 +13,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class UserAuth {
     @Id
     @Column(nullable = false, unique = true)
@@ -35,6 +36,13 @@ public class UserAuth {
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     @ToString.Exclude
     private List<EntityPermission> permissions;
+
+    public UserAuth(@NonNull Long id, @NonNull String email, @NonNull String password, @NonNull Role role) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 
     @Override
     public boolean equals(Object o) {

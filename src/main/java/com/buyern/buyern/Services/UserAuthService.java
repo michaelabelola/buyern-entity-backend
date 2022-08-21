@@ -17,15 +17,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ServerErrorException;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -35,6 +37,7 @@ public class UserAuthService {
     final UserAuthRepository userAuthRepository;
     final UserRepository userRepository;
     final CustomTokenRepository customTokenRepository;
+    final FileService fileService;
 
     public ResponseEntity<ResponseDTO> existsByEmail(String email) {
         ObjectNode jsonNode = new ObjectMapper().createObjectNode();
@@ -44,25 +47,34 @@ public class UserAuthService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseDTO> registerUser(UserDto.UserSignUpDTO userDto) {
+    public ResponseEntity<ResponseDTO> registerUser(UserDto.UserSignUpDTO userDto) throws HttpMediaTypeNotSupportedException {
         userDto.setEmail(userDto.getEmail().toLowerCase());
         if (userAuthRepository.existsByEmail(userDto.getEmail()))
             throw new EntityAlreadyExistsException("Email already registered");
+        if (userDto.getProfileImage() == null)
+            throw new EntityAlreadyExistsException("profile Image is required");
+        logger.info(userDto.getProfileImage().getContentType());
+        if (!Objects.equals(userDto.getProfileImage().getContentType(), MediaType.IMAGE_PNG_VALUE) && !Objects.equals(userDto.getProfileImage().getContentType(), MediaType.IMAGE_JPEG_VALUE) && !Objects.equals(userDto.getProfileImage().getContentType(), MediaType.IMAGE_GIF_VALUE))
+            throw new HttpMediaTypeNotSupportedException("file must be an image: png, jpeg, gif");
 
-        User user = userDto.toModel();
-        UserAuth userAuth = new UserAuth();
+        User savedUser = userRepository.save(userDto.toModel());
+        userAuthRepository.save(new UserAuth(savedUser.getId(), savedUser.getEmail(), SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()), Role.ADMIN));
+        User userWithSavedImage = uploadImage(savedUser, userDto.getProfileImage());
+//        ObjectNode objectNode = new ObjectMapper().createObjectNode().putPOJO("userAuth", userAuth).putPOJO("user", userWithSavedImage);
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userWithSavedImage).build());
+    }
 
-        User savedUser = userRepository.save(user);
-        userAuth.setId(savedUser.getId());
-        userAuth.setEmail(savedUser.getEmail());
-        userAuth.setPassword(SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()));
-        userAuth.setRole(Role.ADMIN);
-        userAuth.setVerified(false);
+    @Transactional
+    public User uploadImage(User user, MultipartFile multipartFile) {
+        String name = "profileImage." + multipartFile.getContentType().split("/")[1];
+//        File file = renameFile(multipartFile, String.valueOf(id));
 
-        UserAuth savedUserAuth = userAuthRepository.save(userAuth);
-        ObjectNode objectNode = new ObjectMapper().createObjectNode().putPOJO("userAuth", savedUserAuth).putPOJO("user", savedUser);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(objectNode).build());
-
+        String uploadedFileLink = fileService.uploadToUsersContainer(multipartFile, user.getId() + "/" + name);
+        if (uploadedFileLink.isBlank())
+            throw new ServerErrorException("Unable To Upload file. Try uploading another", new Throwable("Unable To Upload file. Try uploading another"));
+        user.setImage(uploadedFileLink);
+//        userRepository.save(user);
+        return user;
     }
 
     public ResponseEntity<ResponseDTO> forgotPassword(String email) {
@@ -97,7 +109,10 @@ public class UserAuthService {
 //       logger.info(auth.getName());
 //       logger.info(String.valueOf(auth.isAuthenticated()));
         logger.info((String) auth.getPrincipal());
-        return ResponseEntity.ok(ResponseDTO.builder().message("00").data("SUCCESS").data(userRepository.findById(Long.valueOf(String.valueOf(auth.getPrincipal())))).build());
+        return ResponseEntity.ok(
+                ResponseDTO.builder().code("00").message("Signin Successful")
+                        .data(userRepository.findById(Long.valueOf(String.valueOf(auth.getPrincipal()))).orElseThrow(() -> new EntityNotFoundException("User Not Found")))
+                        .build());
     }
 
     private User getUserByEmail(String email) {

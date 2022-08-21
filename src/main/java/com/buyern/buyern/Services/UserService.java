@@ -9,11 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ServerErrorException;
 
 import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -33,20 +30,6 @@ public class UserService {
 
     public ResponseEntity<ResponseDTO> getUsers(List<Long> ids) {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userRepository.findAllById(ids)).build());
-    }
-
-    @Transactional
-    public ResponseEntity<ResponseDTO> uploadImage(Long id, MultipartFile multipartFile) {
-        User user = getUserById(id);
-        String name = "profileImage." + multipartFile.getContentType().split("/")[1];
-//        File file = renameFile(multipartFile, String.valueOf(id));
-
-        String uploadedFileLink = fileService.uploadToUsersContainer(multipartFile, user.getId() + "/" + name);
-        if (uploadedFileLink.isBlank())
-            throw new ServerErrorException("Unable To Upload file. Try uploading another", new Throwable("Unable To Upload file. Try uploading another"));
-        user.setImage(uploadedFileLink);
-//        userRepository.save(user);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(user).build());
     }
 
     private User getUserById(Long id) {

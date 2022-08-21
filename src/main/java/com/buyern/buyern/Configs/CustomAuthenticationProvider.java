@@ -26,7 +26,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     // and validate the user
     // we are hardcoding for a single user for demo purposes
     UserDetails isValidUser(String email, String password) {
-        logger.info("On Login : User Auth Details: {} - {}", email.toLowerCase(), SecurityConfiguration.passwordEncoder().encode(password));
+        logger.info("On Login : User Auth Details: {} - {}", email.toLowerCase(), password);
         UserAuth userAuth = userAuthRepository.findByEmail(email.toLowerCase()).orElseThrow(() -> new BadCredentialsException("Email Incorrect"));
         if(!SecurityConfiguration.passwordEncoder().matches(password, userAuth.getPassword())){
             throw new BadCredentialsException("Password Incorrect");
@@ -62,10 +62,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                     userDetails.getUsername(),
                     password,
                     userDetails.getAuthorities());
-//            return new UsernamePasswordAuthenticationToken(
-//                    username,
-//                    password,
-//                    userDetails.getAuthorities());
         } else {
             throw new BadCredentialsException("Incorrect user credentials");
         }

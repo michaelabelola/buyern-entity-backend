@@ -1,11 +1,9 @@
 package com.buyern.buyern.dtos;
 
-import com.buyern.buyern.Models.Location.City;
-import com.buyern.buyern.Models.Location.Country;
-import com.buyern.buyern.Models.Location.State;
 import com.buyern.buyern.Models.User.User;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -59,5 +57,7 @@ public class UserDto implements Serializable {
     public static class UserSignUpDTO extends UserDto {
         @NotNull(message = "Password is mandatory")
         private String password;
+        @NotNull(message = "Profile Image is mandatory")
+        private MultipartFile profileImage;
     }
 }
