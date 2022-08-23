@@ -22,9 +22,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     final UserAuthRepository userAuthRepository;
 
     // TODO:
-    // In this function we need to connect with identity provider
-    // and validate the user
-    // we are hardcoding for a single user for demo purposes
+    //  In this function we need to connect with identity provider
+    //  and validate the user
+    //  we are hardcoding for a single user for demo purposes
     UserDetails isValidUser(String email, String password) {
         logger.info("On Login : User Auth Details: {} - {}", email.toLowerCase(), password);
         UserAuth userAuth = userAuthRepository.findByEmail(email.toLowerCase()).orElseThrow(() -> new BadCredentialsException("Email Incorrect"));

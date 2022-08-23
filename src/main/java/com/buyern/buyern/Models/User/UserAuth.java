@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "user_auth")
@@ -20,6 +19,8 @@ public class UserAuth {
     private Long id;
     @Column(nullable = false, unique = true)
     private String email;
+    @Column(nullable = false, unique = true)
+    private String uId;
     private String password;
     private boolean verified = false;
     private boolean disabled = false;
@@ -28,18 +29,21 @@ public class UserAuth {
     private boolean locked = false;
     @Enumerated(EnumType.STRING)
     private Role role;
+    private String authorities;
 //    list of entity permissions : (TREE)
-    @ManyToMany(cascade = CascadeType.DETACH)
-    @JoinTable(
-            name = "user_entity_permissions",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id"))
-    @ToString.Exclude
-    private List<EntityPermission> permissions;
+//    @ManyToMany(cascade = CascadeType.DETACH)
+//    @JoinTable(
+//            name = "user_entity_permissions",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "course_id"))
+//    @ToString.Exclude
+//    private List<EntityPermission> permissions;
 
-    public UserAuth(@NonNull Long id, @NonNull String email, @NonNull String password, @NonNull Role role) {
+
+    public UserAuth(Long id, String email, String uId, String password, Role role) {
         this.id = id;
         this.email = email;
+        this.uId = uId;
         this.password = password;
         this.role = role;
     }

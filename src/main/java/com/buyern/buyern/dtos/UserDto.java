@@ -20,7 +20,7 @@ public class UserDto implements Serializable {
     @NotBlank(message = "Last name is mandatory")
     private String lastName;
     @NotBlank(message = "email is mandatory")
-    @Email(message = "email is mandatory")
+    @Email(message = "email bad format")
     private String email;
     @NotBlank(message = "phone is mandatory")
     private String phone;
@@ -59,5 +59,19 @@ public class UserDto implements Serializable {
         private String password;
         @NotNull(message = "Profile Image is mandatory")
         private MultipartFile profileImage;
+    }
+    @Data
+    public static class UserLoginDto {
+        @NotBlank(message = "email is mandatory")
+        @Email(message = "email bad format")
+        private String email;
+        @NotNull(message = "Password is mandatory")
+        private String password;
+    }
+    @Data
+    public static class UserAuthJwt{
+        private Long id;
+        private Date loginTime;
+
     }
 }

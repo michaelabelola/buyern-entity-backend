@@ -1,10 +1,12 @@
 package com.buyern.buyern.Controllers;
 
 import com.azure.core.annotation.BodyParam;
+import com.buyern.buyern.Models.User.UserAuth;
 import com.buyern.buyern.Services.UserAuthService;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.dtos.UserDto;
 import com.buyern.buyern.exception.CustomExceptionHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Data;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -83,6 +85,11 @@ public class UserAuthController {
     @GetMapping(path = "/signIn/fail")
     private ResponseEntity<ResponseDTO> loginFail() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseDTO.builder().message("XX").data("Failed").data("Email or Password Incorrect").build());
+    }
+
+    @PostMapping(path = "/signIn")
+    private ResponseEntity<ResponseDTO> signIn(@Valid @RequestBody UserDto.UserLoginDto user, HttpServletResponse response) throws JsonProcessingException {
+        return userAuthService.signIn(user, response);
     }
 
     @GetMapping(path = "signOut/success")

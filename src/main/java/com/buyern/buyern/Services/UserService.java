@@ -1,6 +1,7 @@
 package com.buyern.buyern.Services;
 
 import com.buyern.buyern.Models.User.User;
+import com.buyern.buyern.Models.User.UserAuthSession;
 import com.buyern.buyern.Repositories.UserAuthRepository;
 import com.buyern.buyern.Repositories.UserRepository;
 import com.buyern.buyern.dtos.ResponseDTO;
@@ -23,6 +24,9 @@ public class UserService {
     public static final org.slf4j.Logger logger = LoggerFactory.getLogger(UserService.class);
     public ResponseEntity<ResponseDTO> getUser(Long id) {
         logger.info(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        logger.info(SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString());
+        UserAuthSession userSession = (UserAuthSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        logger.info("AAAAAAAAAAA:::::::::"+ userSession.getJwtId());
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userRepository.findById(id).orElseThrow(() -> {
             throw new EntityNotFoundException("User not found");
         })).build());

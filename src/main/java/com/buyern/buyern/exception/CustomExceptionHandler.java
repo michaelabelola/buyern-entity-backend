@@ -4,6 +4,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -38,33 +40,27 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     public final ResponseEntity<Object> handleRecordNotFoundException(RecordNotFoundException ex, WebRequest webRequest) {
 
         logger.error("RecordNotFoundException stacktrace: {}", ex.getMessage());
-        return new ResponseEntity<>(new ErrorResponse("05", ex.getMessage()), HttpStatus.NOT_FOUND);
-    }
-    @ExceptionHandler(EntityNotFoundException.class)
-    public final ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest webRequest) {
-
-        logger.error("EntityNotFoundException stacktrace: {}", ex.getMessage());
-        return new ResponseEntity<>(new ErrorResponse("05", ex.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponse("04", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EntityAlreadyExistsException.class)
     public final ResponseEntity<Object> handleEntityAlreadyExistsException(EntityAlreadyExistsException ex, WebRequest webRequest) {
-
         logger.error("EntityAlreadyExistsException stacktrace: {}", ex.getMessage());
-        return new ResponseEntity<>(new ErrorResponse("04", ex.getMessage()), HttpStatus.CONFLICT);
+        return new ResponseEntity<>(new ErrorResponse("05", ex.getMessage()), HttpStatus.CONFLICT);
     }
 
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    public final ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-//        Map<String, String> errors = new HashMap<>();
-//        ex.getBindingResult().getAllErrors().forEach((error) -> {
-//            String fieldName = ((FieldError) error).getField();
-//            String errorMessage = error.getDefaultMessage();
-//            errors.put(fieldName, errorMessage);
-//        });
-//        logger.error("MethodArgumentNotValidException stacktrace: {}", ex.getMessage());
-//        return new ResponseEntity<>(new ErrorResponse("04", ex.getMessage(), errors), HttpStatus.BAD_REQUEST);
-//    }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public final ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest webRequest) {
+
+        logger.error("EntityNotFoundException stacktrace: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorResponse("06", ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    public final ResponseEntity<Object> handleInsufficientAuthenticationException(InsufficientAuthenticationException ex, WebRequest webRequest) {
+        logger.error("InsufficientAuthenticationException stacktrace: {}", ex.getMessage());
+        return new ResponseEntity<>(new ErrorResponse("07", "Error!", ex.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
 
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {

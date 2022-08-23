@@ -1,8 +1,5 @@
 package com.buyern.buyern.Models.User;
 
-import com.buyern.buyern.Models.Location.City;
-import com.buyern.buyern.Models.Location.Country;
-import com.buyern.buyern.Models.Location.State;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.Hibernate;
@@ -11,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity(name = "Users")
 @Getter
@@ -26,6 +24,7 @@ public class User {
     private String firstName;
     @Column(nullable = false)
     private String lastName;
+    private String uId = UUID.randomUUID().toString();
     private String email;
     private String phone;
     @JsonFormat(pattern = "yyyy-MM-dd")

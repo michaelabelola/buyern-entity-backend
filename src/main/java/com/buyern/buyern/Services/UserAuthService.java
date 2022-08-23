@@ -12,13 +12,16 @@ import com.buyern.buyern.Repositories.UserRepository;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.dtos.UserDto;
 import com.buyern.buyern.exception.EntityAlreadyExistsException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -26,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerErrorException;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,6 +41,7 @@ public class UserAuthService {
     final UserAuthRepository userAuthRepository;
     final UserRepository userRepository;
     final CustomTokenRepository customTokenRepository;
+    final UserSessionService userSessionService;
     final FileService fileService;
 
     public ResponseEntity<ResponseDTO> existsByEmail(String email) {
@@ -58,15 +63,15 @@ public class UserAuthService {
             throw new HttpMediaTypeNotSupportedException("file must be an image: png, jpeg, gif");
 
         User savedUser = userRepository.save(userDto.toModel());
-        userAuthRepository.save(new UserAuth(savedUser.getId(), savedUser.getEmail(), SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()), Role.ADMIN));
+        userAuthRepository.save(new UserAuth(savedUser.getId(), savedUser.getEmail(), savedUser.getUId(), SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()), Role.ADMIN));
         User userWithSavedImage = uploadImage(savedUser, userDto.getProfileImage());
-//        ObjectNode objectNode = new ObjectMapper().createObjectNode().putPOJO("userAuth", userAuth).putPOJO("user", userWithSavedImage);
+//        ObjectNode oN = new ObjectMapper().createObjectNode().putPOJO("userAuth", userAuth).putPOJO("user", userWithSavedImage);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userWithSavedImage).build());
     }
 
     @Transactional
     public User uploadImage(User user, MultipartFile multipartFile) {
-        String name = "profileImage." + multipartFile.getContentType().split("/")[1];
+        String name = "profileImage." + Objects.requireNonNull(multipartFile.getContentType()).split("/")[1];
 //        File file = renameFile(multipartFile, String.valueOf(id));
 
         String uploadedFileLink = fileService.uploadToUsersContainer(multipartFile, user.getId() + "/" + name);
@@ -106,8 +111,6 @@ public class UserAuthService {
 
     public ResponseEntity<ResponseDTO> loginSuccess(Authentication auth) {
 //       Principal principal = (Principal) auth.getPrincipal();
-//       logger.info(auth.getName());
-//       logger.info(String.valueOf(auth.isAuthenticated()));
         logger.info((String) auth.getPrincipal());
         return ResponseEntity.ok(
                 ResponseDTO.builder().code("00").message("Signin Successful")
@@ -119,5 +122,13 @@ public class UserAuthService {
         return userRepository.findByEmail(email).orElseThrow(() -> {
             throw new EntityNotFoundException("Email Not found");
         });
+    }
+
+    public ResponseEntity<ResponseDTO> signIn(UserDto.UserLoginDto userLoginDto, HttpServletResponse response) throws JsonProcessingException {
+        UserAuth userAuth = userAuthRepository.findByEmail(userLoginDto.getEmail()).orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Email is Not Registered"));
+        if (!SecurityConfiguration.passwordEncoder().matches(userLoginDto.getPassword(), userAuth.getPassword()))
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseDTO.builder().code("XX").message("Invalid Password").build());
+        userSessionService.startNewUserSession(userAuth, response, true);
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("Authentication successful: " ).build());
     }
 }
