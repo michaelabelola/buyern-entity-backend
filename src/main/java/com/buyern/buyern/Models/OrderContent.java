@@ -20,7 +20,7 @@ public class OrderContent {
     private String placedBy;
     private BuyernEntityType placedByType;
     private OrderType orderType;
-    @OneToOne
+    @ManyToOne
     private Location location;
 
     public Long getId() {

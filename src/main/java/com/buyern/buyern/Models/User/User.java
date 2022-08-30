@@ -24,7 +24,8 @@ public class User {
     private String firstName;
     @Column(nullable = false)
     private String lastName;
-    private String uId = UUID.randomUUID().toString();
+    @Column(unique = true)
+    private String uid = UUID.randomUUID().toString();
     private String email;
     private String phone;
     @JsonFormat(pattern = "yyyy-MM-dd")

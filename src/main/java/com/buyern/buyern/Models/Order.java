@@ -33,7 +33,7 @@ public class Order {
     @JoinTable(joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "content_id"))
     private List<OrderContent> contents;
     private Long handlingEntity;// entity id
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "location_id")
     private Location location;
     private Long handler;//user id

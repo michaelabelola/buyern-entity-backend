@@ -20,14 +20,9 @@ public class HelperController {
         return helperService.getEntityTypes();
     }
 
-    @GetMapping("entityCategories")
-    private ResponseEntity<ResponseDTO> getEntityCategories() {
-        return helperService.getEntityCategories();
-    }
-
-    @GetMapping("entityCategories/tools")
-    private ResponseEntity<ResponseDTO> getEntityCategoryTools(@RequestParam Long categoryId) {
-        return helperService.getEntityCategoriesItems(categoryId);
+    @GetMapping("entityTypes/tools")
+    private ResponseEntity<ResponseDTO> getEntityTypeTools(@RequestParam Long typeId) {
+        return helperService.getEntityTypeTools(typeId);
     }
 
     @GetMapping("tools")

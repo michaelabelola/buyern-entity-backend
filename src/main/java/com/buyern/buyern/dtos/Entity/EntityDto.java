@@ -1,16 +1,15 @@
 package com.buyern.buyern.dtos.Entity;
 
-import com.buyern.buyern.Enums.BuyernEntityType;
-import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Enums.State;
-import com.buyern.buyern.Models.Entity.Entity;
-import com.buyern.buyern.dtos.LocationDto;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.buyern.buyern.Models.Entity.EntityType;
+import com.buyern.buyern.Models.Location.Location;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Date;
@@ -21,69 +20,55 @@ public class EntityDto implements Serializable {
     private Long id;
     private String entityId;
     private String name;
-    private String about;
-    private EntityType type;
-    private boolean registeredWithGovt;
-    @JsonFormat(pattern = "YYYY-MM-dd")
-    private LocalDate dateEstablished;
     private State.Entity state;
-    private EntityCategoryDto category;
-    private Long parentId;
+    private EntityType type;
+    private Location location;
+    private String registererId;
+    private boolean isLive;
+    private String logo;
+    private String logoDark;
     private String email;
     private String phone;
-    private LocationDto location;
+    private boolean registeredWithGovt;
+    private String about;
+    private LocalDate dateEstablished;
+    private Long parentId;
     private boolean hq;
-    private EntityPreferencesDto preferences;
-    @Enumerated(EnumType.STRING)
-    private BuyernEntityType registererType;
-    private String registererId;
     private Date timeRegistered;
-    private boolean isLive;
+    private String color;
+    private String colorDark;
+    private String coverImage;
+    private String coverImageDark;
 
-    public Entity toEntity() {
-        Entity entity = new Entity();
-        entity.setId(getId());
-        entity.setEntityId(getEntityId());
-        entity.setName(getName());
-        entity.setAbout(getAbout());
-        entity.setType(getType());
-        entity.setRegisteredWithGovt(isRegisteredWithGovt());
-        entity.setDateEstablished(getDateEstablished());
-        entity.setState(getState());
-        entity.setCategory(getCategory().toEntityCategory());
-        entity.setParentId(getParentId());
-        entity.setEmail(getEmail());
-        entity.setPhone(getPhone());
-        entity.setLocation(getLocation().toLocation());
-        entity.setHq(isHq());
-        entity.setPreferences(getPreferences().toEntityPreferences());
-        entity.setRegistererId(getRegistererType() + "/" + getRegistererId());
-        entity.setLive(isLive());
-        return entity;
-    }
+    @Data
+    public static class EntityRegistrationDto implements Serializable {
+        @NotBlank(message = "Entity Name can't be empty")
+        private String name;
+        @NotNull(message = "type not specified")
+        private EntityType type;
+        @NotNull(message = "entity location not specified")
+        private Location location;
+        @NotBlank(message = "email not specified")
+        private String email;
+        @NotBlank(message = "phone not specified")
+        private String phone;
+        @NotNull(message = "is registered with govt not specified")
+        private boolean registeredWithGovt;
+        private String about;
+        @NotNull(message = "date est. not specified")
+        private LocalDate dateEstablished;
+        private Long parentId;
+        private boolean hq;
+        private String color;
+        private String colorDark;
 
-    public static EntityDto create(Entity entity) {
-        String[] regId = entity.getRegistererId().split("/");
-        return EntityDto.builder()
-                .id(entity.getId())
-                .entityId(entity.getEntityId())
-                .name(entity.getName())
-                .about(entity.getAbout())
-                .type(entity.getType())
-                .registeredWithGovt(entity.isRegisteredWithGovt())
-                .dateEstablished(entity.getDateEstablished())
-                .state(entity.getState())
-                .category(EntityCategoryDto.create(entity.getCategory()))
-                .parentId(entity.getParentId())
-                .email(entity.getEmail())
-                .phone(entity.getPhone())
-                .location(LocationDto.create(entity.getLocation()))
-                .hq(entity.isHq())
-                .preferences(EntityPreferencesDto.create(entity.getPreferences()))
-                .registererType(BuyernEntityType.valueOf(regId[0]))
-                .registererId(regId[1])
-                .isLive(entity.isLive())
-                .build();
-
+        public static class EntityImageRegistrationDto{
+            private String uid;
+            @NotBlank(message = "logo not specified")
+            private MultipartFile logo;
+            private MultipartFile logoDark;
+            private MultipartFile coverImage;
+            private MultipartFile coverImageDark;
+        }
     }
 }

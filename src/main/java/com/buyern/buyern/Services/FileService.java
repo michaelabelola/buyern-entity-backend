@@ -141,7 +141,7 @@ public class FileService {
     public String uploadToEntityContainer(String entityId, MultipartFile file, String destination) {
         String uploadedFileUrl = upload(getContainerClient(entityId), file, destination);
         if (uploadedFileUrl == null)
-            return upload(createContainerClient(usersContainerName), file, destination);
+            return upload(createContainerClient(entityId), file, destination);
         return uploadedFileUrl;
     }
     public String uploadToEntityContainer(String entityId, File file, String destination) {

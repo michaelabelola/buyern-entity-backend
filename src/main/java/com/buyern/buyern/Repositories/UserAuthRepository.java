@@ -13,17 +13,19 @@ import java.util.Optional;
 
 @Repository
 public interface UserAuthRepository extends JpaRepository<UserAuth, Long> {
+
     @Query("select u from user_auth u where u.email = ?1 and u.password = ?2")
     Optional<UserAuth> findByEmailAndPassword(@NonNull String email, @NonNull String password);
 
     Optional<UserAuth> findByEmail(@Nullable String email);
-    Optional<UserAuth> findByuId(String userId);
+
+    Optional<UserAuth> findByUid(String userId);
 
     boolean existsByEmail(String email);
 
     @Transactional
     @Modifying
     @Query("update user_auth u set u.password = ?1 where u.id = ?2")
-    int updatePasswordById(String password, Long id);
 
+    int updatePasswordById(String password, Long id);
 }

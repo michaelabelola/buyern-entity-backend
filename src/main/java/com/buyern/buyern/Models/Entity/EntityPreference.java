@@ -7,27 +7,25 @@ import javax.persistence.Entity;
 import javax.persistence.*;
 import java.util.Objects;
 
-@Entity(name = "entity_categories")
+@Entity(name = "entity_preferences")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class EntityCategory {
+public class EntityPreference {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Long id;
-    //ECOMMERCE, FINANCE, DELIVERY, FOOD_SALE
-    @Column(unique = true, nullable = false)
-    private String name;
-    @Column(unique = true, nullable = false)
-    private String value;
+    private String color;
+    private String colorDark;
+    private String coverImage;
+    private String coverImageDark;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        EntityCategory that = (EntityCategory) o;
+        EntityPreference that = (EntityPreference) o;
         return id != null && Objects.equals(id, that.id);
     }
 

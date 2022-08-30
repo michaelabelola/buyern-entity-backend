@@ -18,13 +18,13 @@ public class Delivery {
     @Column(nullable = false)
     private Long id;
     private Long entityId;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "start_location_id")
     private Location startLocation;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "end_location_id")
     private Location endLocation;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "current_location_id")
     private Location currentLocation;
     private State.Delivery state;

@@ -1,14 +1,13 @@
 package com.buyern.buyern.Services;
 
 import com.buyern.buyern.Controllers.UserController;
-import com.buyern.buyern.Enums.EntityType;
 import com.buyern.buyern.Helpers.ListMapper;
-import com.buyern.buyern.Models.Entity.EntityCategory;
+import com.buyern.buyern.Models.Entity.EntityType;
 import com.buyern.buyern.Models.Location.City;
 import com.buyern.buyern.Repositories.*;
-import com.buyern.buyern.Repositories.Entity.EntityCategoryRepository;
-import com.buyern.buyern.Repositories.Entity.EntityCategoryToolsRepository;
-import com.buyern.buyern.dtos.Entity.EntityCategoryDto;
+import com.buyern.buyern.Repositories.Entity.EntityTypeRepository;
+import com.buyern.buyern.Repositories.Entity.EntityTypeToolRepository;
+import com.buyern.buyern.dtos.Entity.EntityTypeDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -26,11 +25,11 @@ import java.util.Optional;
 @AllArgsConstructor
 public class HelperService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
-    final EntityCategoryRepository entityCategoryRepository;
+    final EntityTypeRepository entityTypeRepository;
     final CountryRepository countryRepository;
     final StateRepository stateRepository;
     final CityRepository cityRepository;
-    final EntityCategoryToolsRepository entityCategoryToolsRepository;
+    final EntityTypeToolRepository entityTypeToolRepository;
     final ToolRepository toolRepository;
 
     /**
@@ -40,18 +39,7 @@ public class HelperService {
      */
     public ResponseEntity<ResponseDTO> getEntityTypes() {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(EntityType.values())
-                .build());
-    }
-
-    /**
-     * <h3>Entity Categories</h3>
-     *
-     * @return List of available entity categories
-     */
-    public ResponseEntity<ResponseDTO> getEntityCategories() {
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS")
-                .data(new ListMapper<EntityCategory, EntityCategoryDto>().map(entityCategoryRepository.findAll(), EntityCategoryDto::create))
+                .data(new ListMapper<EntityType, EntityTypeDto>().map(entityTypeRepository.findAll(), EntityTypeDto::create))
                 .build());
     }
 
@@ -211,16 +199,18 @@ public class HelperService {
                 .build());
     }
 
-    public ResponseEntity<ResponseDTO> getEntityCategoriesItems(Long categoryId) {
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(entityCategoryToolsRepository.findByEntityCategory_Id(categoryId)).build());
+    public ResponseEntity<ResponseDTO> getEntityTypeTools(Long typeId) {
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(entityTypeToolRepository.findByEntityType_Id(typeId)).build());
     }
+
     public ResponseEntity<ResponseDTO> getTools() {
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(toolRepository.findAll()).build());
     }
 
     /**
      * <h3>Rename A MultipartFile And Move It To Project's Base Location. </h3>
-     * @param _file the multipart file
+     *
+     * @param _file   the multipart file
      * @param newName new name to be assigned to returned file
      * @return the new file object is returned
      * @apiNote the File object returned has its name in the format = newName.fileExtension

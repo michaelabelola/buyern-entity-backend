@@ -1,7 +1,7 @@
 package com.buyern.buyern.Services;
 
 import com.buyern.buyern.Models.User.User;
-import com.buyern.buyern.Models.User.UserAuthSession;
+import com.buyern.buyern.Models.User.UserSession;
 import com.buyern.buyern.Repositories.UserAuthRepository;
 import com.buyern.buyern.Repositories.UserRepository;
 import com.buyern.buyern.dtos.ResponseDTO;
@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.security.Principal;
 import java.util.List;
 
 @Service
@@ -22,14 +23,21 @@ public class UserService {
     final FileService fileService;
 
     public static final org.slf4j.Logger logger = LoggerFactory.getLogger(UserService.class);
-    public ResponseEntity<ResponseDTO> getUser(Long id) {
-        logger.info(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
-        logger.info(SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString());
-        UserAuthSession userSession = (UserAuthSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        logger.info("AAAAAAAAAAA:::::::::"+ userSession.getJwtId());
+
+    public ResponseEntity<ResponseDTO> getUser(Long id, Principal principal) {
+        if (principal != null) {
+
+            logger.info(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+            logger.info(SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString());
+        }
+//        UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userRepository.findById(id).orElseThrow(() -> {
             throw new EntityNotFoundException("User not found");
         })).build());
+    }
+
+    public ResponseEntity<ResponseDTO> getUserByUid(String uId, Principal principal) {
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(findUserByUid(uId)).build());
     }
 
     public ResponseEntity<ResponseDTO> getUsers(List<Long> ids) {
@@ -44,6 +52,12 @@ public class UserService {
 
     private User getUserById(String id) {
         return userRepository.findById(Long.valueOf(id)).orElseThrow(() -> {
+            throw new EntityNotFoundException("User not found");
+        });
+    }
+
+    public User findUserByUid(String uid) {
+        return userRepository.findByUid(uid).orElseThrow(() -> {
             throw new EntityNotFoundException("User not found");
         });
     }

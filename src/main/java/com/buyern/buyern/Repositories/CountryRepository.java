@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface CountryRepository extends JpaRepository<Country, Long> {
 
     @Query("select c from countries c order by c.name")

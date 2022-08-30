@@ -2,7 +2,6 @@ package com.buyern.buyern.Models.User;
 
 import com.buyern.buyern.Configs.CustomAuthority;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisHash;
 
 import javax.persistence.Id;
@@ -10,10 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-//session duration is 1 hr
-@RedisHash(value = "userSessions", timeToLive = 3600L)
+@RedisHash(value = "userSessions", timeToLive = 86400L)
 @Data
-public class UserAuthSession implements Serializable {
+public class UserSession implements Serializable {
     /**
      * <h3>userId</h3>
      */

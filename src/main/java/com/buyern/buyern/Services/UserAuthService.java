@@ -63,7 +63,7 @@ public class UserAuthService {
             throw new HttpMediaTypeNotSupportedException("file must be an image: png, jpeg, gif");
 
         User savedUser = userRepository.save(userDto.toModel());
-        userAuthRepository.save(new UserAuth(savedUser.getId(), savedUser.getEmail(), savedUser.getUId(), SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()), Role.ADMIN));
+        userAuthRepository.save(new UserAuth(savedUser.getId(), savedUser.getEmail(), savedUser.getUid(), SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()), Role.ADMIN));
         User userWithSavedImage = uploadImage(savedUser, userDto.getProfileImage());
 //        ObjectNode oN = new ObjectMapper().createObjectNode().putPOJO("userAuth", userAuth).putPOJO("user", userWithSavedImage);
         return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userWithSavedImage).build());
@@ -129,6 +129,6 @@ public class UserAuthService {
         if (!SecurityConfiguration.passwordEncoder().matches(userLoginDto.getPassword(), userAuth.getPassword()))
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseDTO.builder().code("XX").message("Invalid Password").build());
         userSessionService.startNewUserSession(userAuth, response, true);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("Authentication successful: " ).build());
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("Login Successful" ).build());
     }
 }

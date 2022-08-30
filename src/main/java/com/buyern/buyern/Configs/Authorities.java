@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 public class Authorities {
     private List<CustomAuthority> customAuthorities;
 
+    public void addAuthority(CustomAuthority customAuthority) {
+        customAuthorities.add(customAuthority);
+    }
+/**
+ * used to add new authority*/
     public void addAuthority(String authority) {
         customAuthorities.add(new CustomAuthority(authority));
     }

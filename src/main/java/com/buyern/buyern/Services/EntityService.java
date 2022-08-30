@@ -19,10 +19,6 @@ public class EntityService {
     }
 
     public ResponseEntity<ResponseDTO> getEntityById(Long entityId) {
-        System.out.println(entityId.toString());
-        Optional<Entity> entity = entityRepository.findById(entityId);
-        if (entity.isEmpty())
-            throw new RecordNotFoundException("Entity does not exist");
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity.get())).build());
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(entityRepository.findById(entityId).orElseThrow(() -> new RecordNotFoundException("Entity not found"))).build());
     }
 }

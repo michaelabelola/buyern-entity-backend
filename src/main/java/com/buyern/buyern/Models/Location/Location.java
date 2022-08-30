@@ -14,13 +14,21 @@ public class Location {
     private Long id;
     private String tag;
     private String address;
-    private String city;
-    @Column(nullable = false)
-    private String state;
-    @Column(nullable = false)
-    private String country;
+//    @Column(name = "city_id")
+//    private Long city;
+//    @Column(name = "state_id")
+//    private Long state;
+//    @Column(name = "country_id")
+//    private Long country;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private City city;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private State state;
+    @ManyToOne(cascade = CascadeType.DETACH)
+    private Country country;
     private String zipcode;
-    private String latitude;
-    private String longitude;
+    private Double latitude;
+    private Double longitude;
+//    private String ownerId;
 
 }

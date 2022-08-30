@@ -1,140 +1,149 @@
 package com.buyern.buyern.Services;
 
-import com.buyern.buyern.Enums.BuyernEntityType;
 import com.buyern.buyern.Models.Entity.*;
-import com.buyern.buyern.Repositories.Entity.EntityRegistrationStepRepository;
+import com.buyern.buyern.Models.Entity.Entity;
+import com.buyern.buyern.Models.Location.Location;
+import com.buyern.buyern.Models.User.User;
+import com.buyern.buyern.Repositories.Entity.EntityDetailRepository;
+import com.buyern.buyern.Repositories.Entity.EntityPreferenceRepository;
 import com.buyern.buyern.Repositories.Entity.EntityRepository;
+import com.buyern.buyern.Repositories.LocationRepository;
+import com.buyern.buyern.Repositories.UserRepository;
 import com.buyern.buyern.dtos.Entity.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
 import com.buyern.buyern.exception.RecordNotFoundException;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @Data
 public class EntityRegistrationService {
+    final UserRepository userRepository;
     final EntityRepository entityRepository;
+    final EntityDetailRepository entityDetailRepository;
+    final EntityPreferenceRepository entityPreferenceRepository;
+    final LocationRepository locationRepository;
     final FileService fileService;
-    final EntityRegistrationStepRepository entityRegistrationStepRepository;
+    Logger logger = LoggerFactory.getLogger(EntityRegistrationService.class);
 
-
-    public ResponseEntity<ResponseDTO> getEntity(String by, Long value) {
-        Optional<Entity> entity = switch (by) {
-            case "REGISTERER_ID" -> entityRepository.findByRegistererId(BuyernEntityType.BUSINESS + "/" + value);
-            case "PARENT_ID" -> entityRepository.findByParentId(value);
-            default -> Optional.empty();
-        };
-        if (entity.isEmpty())
-            throw new RecordNotFoundException("Entity does not exist");
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity.get())).build());
+    private Entity fetchEntityById(Long id) {
+        return entityRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Entity not found"));
     }
 
-    public ResponseEntity<ResponseDTO> register1(String registererEntityId, String entityName) {
-        if (registererEntityId.isEmpty()) throw new RuntimeException("registerer not specified");
-        if (entityName.isEmpty()) throw new RuntimeException("entityName cant be empty");
-        /* if registererEntityId is null then registererType is USER. get user id from header etc*/
+    private List<Entity> fetchChildrenEntityById(Long id) {
+        return entityRepository.findAllByParentId(id);
+    }
+
+    public ResponseEntity<ResponseDTO> getChildEntities(Long id) {
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(fetchChildrenEntityById(id)).build());
+    }
+
+    public ResponseEntity<ResponseDTO> getEntity(Long id) {
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(fetchEntityById(id)).build());
+    }
+
+    public ResponseEntity<Boolean> checkEntityNameAvailability(String name) {
+        return ResponseEntity.ok(entityRepository.existsByNameAllIgnoreCase(name));
+    }
+
+    /**
+     * <h3>Entity registration step 1. Entity Details</h3>
+     * return entity
+     */
+//    @Transactional
+    public ResponseEntity<ResponseDTO> register(EntityDto.EntityRegistrationDto entityDto, Principal principal) {
+        logger.info(String.valueOf(principal.getName()));
+        User user = userRepository.findByUid(principal.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        logger.info(user.toString());
+//        Location savedLocation = locationRepository.save(entityDto.getLocation());
+
+
         Entity entity = new Entity();
-        entity.setName(entityName);
-        entity.setRegistererId(BuyernEntityType.BUSINESS + "/" + registererEntityId);
-//        entity.setParentId();
-        EntityDto entityDto = EntityDto.create(entityRepository.save(entity));
-        EntityRegistrationStep entityRegistrationStep = new EntityRegistrationStep();
-        entityRegistrationStep.setEntityId(entityDto.getId());
-        entityRegistrationStep.setRegistrationStep(1);
-        entityRegistrationStepRepository.save(entityRegistrationStep);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").data(entityDto).build());
-    }
+        entity.setName(entityDto.getName());
+//        entity.setState(entityDto.getState());
+        entity.setType(entityDto.getType());
+        entity.setLocation(entityDto.getLocation());
+        entity.setLive(false);
+        Entity savedEntity = entityRepository.save(entity);
 
-    /**
-     * <h3>get entity registration current step count.</h3>
-     *
-     * @param entityId entity
-     */
-    private EntityRegistrationStep getRegistrationProgress(Long entityId) {
-        Optional<EntityRegistrationStep> entityRegistrationStep = entityRegistrationStepRepository.findByEntityId(entityId);
-        if (entityRegistrationStep.isEmpty())
-            throw new RuntimeException("Entity has already been registered or entity does not exist");
-        else return entityRegistrationStep.get();
-    }
 
-    public ResponseEntity<ResponseDTO> register2(EntityDto entityDto) {
-        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getId());
-        Optional<Entity> entity = entityRepository.findById(entityDto.getId());
-        if (entity.isEmpty())
-            throw new RecordNotFoundException("entity with registration id not found");
-        entity.get().setAbout(entityDto.getAbout());
-        entity.get().setType(entityDto.getType());
-        entity.get().setRegisteredWithGovt(entityDto.isRegisteredWithGovt());
-        entity.get().setDateEstablished(entityDto.getDateEstablished());
-        entity.get().setEmail(entityDto.getEmail());
-        entity.get().setPhone(entityDto.getPhone());
-        entity.get().setHq(entityDto.isHq());
-        entity.get().setCategory(entityDto.getCategory().toEntityCategory());
-        Entity entity1 = entityRepository.save(entity.get());
-        entityRegistrationStep.setRegistrationStep(2);
-        entityRegistrationStepRepository.save(entityRegistrationStep);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").data(EntityDto.create(entity1)).build());
-    }
-
-    /**
-     * <h3>Register Entity Location
-     *
-     * @param entityDto entity dto must contain a well formatted location field
-     * @return ResponseEntity containing entityDto</h3>
-     */
-    public ResponseEntity<ResponseDTO> register3(EntityDto entityDto) {
-        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityDto.getId());
-        Entity entity = getEntity(entityDto.getId());
-        if (entity.getLocation() != null) {
-            entityDto.getLocation().setId(entity.getLocation().getId());
+        EntityDetail entityDetail = new EntityDetail();
+        entityDetail.setId(savedEntity.getId());
+        entityDetail.setEmail(entityDto.getEmail());
+        entityDetail.setPhone(entityDto.getPhone());
+        entityDetail.setRegisteredWithGovt(entityDto.isRegisteredWithGovt());
+        entityDetail.setRegistererId(user.getUid());
+        entityDetail.setAbout(entityDto.getAbout());
+        entityDetail.setDateEstablished(entityDto.getDateEstablished());
+        //TODO: check if user has permission to register a child company under this company
+        if (entityDto.getParentId() != null) {
+            Optional<Entity> parent = entityRepository.findById(entityDto.getParentId());
+            parent.ifPresent(entityDetail::setParent);
         }
-        entity.setLocation(entityDto.getLocation().toLocation());
-        Entity entity1 = entityRepository.save(entity);
-        entityRegistrationStep.setRegistrationStep(3);
-        entityRegistrationStepRepository.save(entityRegistrationStep);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity1)).build());
+        entityDetail.setHq(entityDto.isHq());
+        EntityDetail savedEntityDetails = entityDetailRepository.save(entityDetail);
+
+
+        EntityPreference entityPreference = new EntityPreference();
+        entityPreference.setId(savedEntity.getId());
+        entityPreference.setColor(entityDto.getColor());
+        entityPreference.setColorDark(entityDto.getColorDark());
+        EntityPreference savedEntityPreference = entityPreferenceRepository.save(entityPreference);
+        savedEntity.setDetails(savedEntityDetails);
+        savedEntity.setPreferences(savedEntityPreference);
+        entityRepository.save(savedEntity);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .code("00")
+                .message("Registered Successfully")
+                .data(savedEntity)
+                .build());
     }
 
     /**
      * <h3>register entity preferences</h3>
      *
-     * @param color     base color for entity. a color from the logo is preferred
-     * @param colorDark base color for entity in dark mode. a color from the logo is preferred
-     * @param logo      entity logo. supported
-     * @return ResponseEntity containing new entityDto
+     * @param entityId       entity id
+     * @param logo           entity logo. supported
+     * @param logoDark       entity logo for dark mode. optional
+     * @param coverImage     entity cover image
+     * @param coverImageDark entity cover image for dark mode
+     * @return ResponseEntity containing new entity
      */
-    public ResponseEntity<ResponseDTO> register4(String color, String colorDark, Long entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
-        EntityRegistrationStep entityRegistrationStep = getRegistrationProgress(entityId);
+    public ResponseEntity<ResponseDTO> registerImages(Long entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
         if (logo != null) verifyMediaType(logo.getContentType());
         if (logoDark != null) verifyMediaType(logoDark.getContentType());
         if (coverImage != null) verifyMediaType(coverImage.getContentType());
         if (coverImageDark != null) verifyMediaType(coverImageDark.getContentType());
 
-        Entity entity = getEntity(entityId);
-        if (entity.getPreferences() == null)
-            entity.setPreferences(new EntityPreferences());
-        if (color != null)
-            entity.getPreferences().setColor(color);
-        if (colorDark != null)
-            entity.getPreferences().setColorDark(colorDark);
+        Entity entity = fetchEntityById(entityId);
+        EntityPreference entityPreference = entityPreferenceRepository.findById(entityId).orElseThrow(() -> new RecordNotFoundException("Entity preferences not found"));
         if (logo != null)
-            entity.getPreferences().setLogo(uploadToEntityBucket(logo, entity.getId(), "logo"));
+            entity.setLogo(uploadToEntityBucket(logo, entity.getId(), "logo"));
         if (logoDark != null)
-            entity.getPreferences().setLogoDark(uploadToEntityBucket(logoDark, entity.getId(), "logoDark"));
+            entity.setLogoDark(uploadToEntityBucket(logoDark, entity.getId(), "logoDark"));
         if (coverImage != null)
-            entity.getPreferences().setCoverImage(uploadToEntityBucket(coverImage, entity.getId(), "coverImage"));
+            entityPreference.setCoverImage(uploadToEntityBucket(coverImage, entity.getId(), "coverImage"));
         if (coverImageDark != null)
-            entity.getPreferences().setCoverImageDark(uploadToEntityBucket(coverImageDark, entity.getId(), "coverImageDark"));
+            entityPreference.setCoverImageDark(uploadToEntityBucket(coverImageDark, entity.getId(), "coverImageDark"));
         Entity entity1 = entityRepository.save(entity);
-        entityRegistrationStep.setRegistrationStep(4);
-        entityRegistrationStepRepository.save(entityRegistrationStep);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(EntityDto.create(entity1)).build());
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .code("00")
+                .message("Registered Successfully")
+                .data(Map.of("entity", entity, "details", entityDetailRepository.findById(entityId).orElseThrow(() -> new RecordNotFoundException("entity details not found")), "preferences", entityPreference))
+                .build());
     }
 
     /**
@@ -151,19 +160,6 @@ public class EntityRegistrationService {
     private String uploadToEntityBucket(MultipartFile file, Long entityId, String newName) {
         String[] name = Objects.requireNonNull(file.getContentType()).split("/");
         return fileService.uploadToEntityContainer(String.valueOf(entityId), file, entityId + "/" + newName + "." + name[name.length - 1]);
-    }
-
-    /**
-     * <h3>Register Entity Location</h3>
-     *
-     * @param entityId entity's unique Long
-     * @return Entity
-     */
-    public Entity getEntity(Long entityId) {
-        Optional<Entity> entity = entityRepository.findById(entityId);
-        if (entity.isEmpty())
-            throw new RecordNotFoundException("entity with registration id not found");
-        return entity.get();
     }
 
     /**
@@ -227,4 +223,10 @@ public class EntityRegistrationService {
 
     }
 
+    public ResponseEntity<Object> deleteEntity(Long entityId) {
+        entityRepository.deleteById(entityId);
+        entityDetailRepository.deleteById(entityId);
+        entityPreferenceRepository.deleteById(entityId);
+        return ResponseEntity.ok("deleted successfully");
+    }
 }

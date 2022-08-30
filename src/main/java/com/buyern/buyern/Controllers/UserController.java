@@ -5,15 +5,23 @@ import com.buyern.buyern.dtos.ResponseDTO;
 import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 import java.util.List;
 
 @RestController
 @Data
 public class UserController {
     final UserService userService;
+
     @GetMapping(path = "user")
-    private ResponseEntity<ResponseDTO> getUser(@RequestParam Long id) {
-        return userService.getUser(id);
+    private ResponseEntity<ResponseDTO> getUser(@RequestParam Long id, Principal principal) {
+        return userService.getUser(id, principal);
+    }
+
+    @GetMapping(path = "userByUid")
+    private ResponseEntity<ResponseDTO> getUser(@RequestParam String uid, Principal principal) {
+        return userService.getUserByUid(uid, principal);
     }
 
     @GetMapping(path = "users")

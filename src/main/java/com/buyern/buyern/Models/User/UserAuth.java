@@ -20,7 +20,7 @@ public class UserAuth {
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false, unique = true)
-    private String uId;
+    private String uid;
     private String password;
     private boolean verified = false;
     private boolean disabled = false;
@@ -40,10 +40,10 @@ public class UserAuth {
 //    private List<EntityPermission> permissions;
 
 
-    public UserAuth(Long id, String email, String uId, String password, Role role) {
+    public UserAuth(Long id, String email, String uid, String password, Role role) {
         this.id = id;
         this.email = email;
-        this.uId = uId;
+        this.uid = uid;
         this.password = password;
         this.role = role;
     }

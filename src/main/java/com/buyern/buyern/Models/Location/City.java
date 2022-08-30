@@ -14,7 +14,8 @@ import java.util.Date;
 public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(nullable = false, columnDefinition = "mediumint(8) NOT NULL AUTO_INCREMENT")
+//  @Column(nullable = false, columnDefinition = "mediumint(8) NOT NULL AUTO_INCREMENT")
+  @Column(nullable = false)
     private Long id;
     @Column(columnDefinition = "varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL")
     private String name;
