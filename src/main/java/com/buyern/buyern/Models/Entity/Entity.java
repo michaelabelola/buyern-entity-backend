@@ -36,10 +36,6 @@ public class Entity implements Serializable {
     private boolean isLive = false;
     private String logo;
     private String logoDark;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private EntityDetail details;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private EntityPreference preferences;
 
     @Override
     public boolean equals(Object o) {

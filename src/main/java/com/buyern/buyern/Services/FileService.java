@@ -10,6 +10,8 @@ import com.azure.storage.blob.models.BlobErrorCode;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,9 +23,17 @@ import java.io.IOException;
 public class FileService {
     @Value("${storage.container.users}")
     String usersContainerName;
-    BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
-            .connectionString("AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1")
-            .buildClient();
+    @Value("${azureBlobConnString}")
+    String azureBlobConnString;
+    BlobServiceClient blobServiceClient;
+    private static final Logger logger = LoggerFactory.getLogger(FileService.class);
+
+    public FileService() {
+        this.blobServiceClient = new BlobServiceClientBuilder()
+//                .connectionString(azureBlobConnString)
+                .connectionString("AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://194.35.120.40:10000/devstoreaccount1;QueueEndpoint=http://194.35.120.40:10001/devstoreaccount1;TableEndpoint=http://194.35.120.40:10002/devstoreaccount1")
+                .buildClient();
+    }
 
     public BlobContainerClient getEntityContainerClient() {
         try {
@@ -71,7 +81,6 @@ public class FileService {
             System.out.println(ex.getMessage());
             throw new RuntimeException("can't convert file to stream");
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
             return null;
 //            throw new RuntimeException("Error uploading to storage server");
         }
@@ -83,10 +92,9 @@ public class FileService {
             blobClient.uploadFromFile(file.getPath(), true);
             return blobClient.getBlobUrl();
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+        return null;
 //            throw new RuntimeException("Error uploading to storage server");
-        }
+    }
     }
 
     public BlobContainerClient containerClient(String containerName) {
@@ -132,18 +140,21 @@ public class FileService {
             return upload(createContainerClient(usersContainerName), file, destination);
         return uploadedFileUrl;
     }
+
     public String uploadToUsersContainer(File file, String destination) {
         String uploadedFileUrl = upload(getContainerClient(usersContainerName), file, destination);
         if (uploadedFileUrl == null)
             return upload(createContainerClient(usersContainerName), file, destination);
         return uploadedFileUrl;
     }
+
     public String uploadToEntityContainer(String entityId, MultipartFile file, String destination) {
         String uploadedFileUrl = upload(getContainerClient(entityId), file, destination);
         if (uploadedFileUrl == null)
             return upload(createContainerClient(entityId), file, destination);
         return uploadedFileUrl;
     }
+
     public String uploadToEntityContainer(String entityId, File file, String destination) {
         String uploadedFileUrl = upload(getContainerClient(entityId), file, destination);
         if (uploadedFileUrl == null)

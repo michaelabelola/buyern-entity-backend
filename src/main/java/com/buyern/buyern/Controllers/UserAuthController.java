@@ -1,6 +1,7 @@
 package com.buyern.buyern.Controllers;
 
 import com.azure.core.annotation.BodyParam;
+import com.buyern.buyern.Models.User.User;
 import com.buyern.buyern.Models.User.UserAuth;
 import com.buyern.buyern.Services.UserAuthService;
 import com.buyern.buyern.dtos.ResponseDTO;
@@ -43,7 +44,7 @@ public class UserAuthController {
     }
 
     @PostMapping(path = "signup", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_OCTET_STREAM_VALUE})
-    private ResponseEntity<ResponseDTO> registerUser(
+    private ResponseEntity<User> registerUser(
             @NotBlank(message = "First name is mandatory") String firstName,
             @NotBlank(message = "Last name is mandatory") String lastName,
             @NotBlank(message = "email is mandatory") @Email(message = "email is mandatory") String email,

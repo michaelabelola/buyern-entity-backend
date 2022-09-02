@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Data
@@ -24,16 +25,14 @@ public class UserService {
 
     public static final org.slf4j.Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public ResponseEntity<ResponseDTO> getUser(Long id, Principal principal) {
+    public ResponseEntity<Optional<User>> getUser(Long id, Principal principal) {
         if (principal != null) {
 
             logger.info(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
             logger.info(SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString());
         }
 //        UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userRepository.findById(id).orElseThrow(() -> {
-            throw new EntityNotFoundException("User not found");
-        })).build());
+        return ResponseEntity.ok(userRepository.findById(id));
     }
 
     public ResponseEntity<ResponseDTO> getUserByUid(String uId, Principal principal) {

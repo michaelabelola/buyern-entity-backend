@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@RedisHash(value = "userSessions", timeToLive = 86400L)
+@RedisHash(value = "userSessions", timeToLive = 2592000L)
 @Data
 public class UserSession implements Serializable {
     /**

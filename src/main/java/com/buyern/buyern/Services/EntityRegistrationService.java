@@ -2,7 +2,6 @@ package com.buyern.buyern.Services;
 
 import com.buyern.buyern.Models.Entity.*;
 import com.buyern.buyern.Models.Entity.Entity;
-import com.buyern.buyern.Models.Location.Location;
 import com.buyern.buyern.Models.User.User;
 import com.buyern.buyern.Repositories.Entity.EntityDetailRepository;
 import com.buyern.buyern.Repositories.Entity.EntityPreferenceRepository;
@@ -43,16 +42,16 @@ public class EntityRegistrationService {
         return entityRepository.findById(id).orElseThrow(() -> new RecordNotFoundException("Entity not found"));
     }
 
-    private List<Entity> fetchChildrenEntityById(Long id) {
+    private List<Entity> fetchChildrenEntityByParentId(Long id) {
         return entityRepository.findAllByParentId(id);
     }
 
     public ResponseEntity<ResponseDTO> getChildEntities(Long id) {
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(fetchChildrenEntityById(id)).build());
+        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(fetchChildrenEntityByParentId(id)).build());
     }
 
-    public ResponseEntity<ResponseDTO> getEntity(Long id) {
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(fetchEntityById(id)).build());
+    public ResponseEntity<Entity> getEntity(Long id) {
+        return ResponseEntity.ok(fetchEntityById(id));
     }
 
     public ResponseEntity<Boolean> checkEntityNameAvailability(String name) {
@@ -63,9 +62,8 @@ public class EntityRegistrationService {
      * <h3>Entity registration step 1. Entity Details</h3>
      * return entity
      */
-//    @Transactional
-    public ResponseEntity<ResponseDTO> register(EntityDto.EntityRegistrationDto entityDto, Principal principal) {
-        logger.info(String.valueOf(principal.getName()));
+    @Transactional
+    public ResponseEntity<Entity> register(EntityDto.EntityRegistrationDto entityDto, Principal principal) {
         User user = userRepository.findByUid(principal.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         logger.info(user.toString());
 //        Location savedLocation = locationRepository.save(entityDto.getLocation());
@@ -77,6 +75,9 @@ public class EntityRegistrationService {
         entity.setType(entityDto.getType());
         entity.setLocation(entityDto.getLocation());
         entity.setLive(false);
+        /**
+         * <h3>Save Entity Save Entity</h3>
+         * */
         Entity savedEntity = entityRepository.save(entity);
 
 
@@ -94,22 +95,20 @@ public class EntityRegistrationService {
             parent.ifPresent(entityDetail::setParent);
         }
         entityDetail.setHq(entityDto.isHq());
-        EntityDetail savedEntityDetails = entityDetailRepository.save(entityDetail);
-
-
+        /**
+         * <h3>Save Entity Details</h3>
+         * */
+        entityDetailRepository.save(entityDetail);
         EntityPreference entityPreference = new EntityPreference();
         entityPreference.setId(savedEntity.getId());
         entityPreference.setColor(entityDto.getColor());
         entityPreference.setColorDark(entityDto.getColorDark());
-        EntityPreference savedEntityPreference = entityPreferenceRepository.save(entityPreference);
-        savedEntity.setDetails(savedEntityDetails);
-        savedEntity.setPreferences(savedEntityPreference);
+        /**
+         * <h3>Save Entity Preferences</h3>
+         * */
+        entityPreferenceRepository.save(entityPreference);
         entityRepository.save(savedEntity);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .code("00")
-                .message("Registered Successfully")
-                .data(savedEntity)
-                .build());
+        return ResponseEntity.ok(savedEntity);
     }
 
     /**
@@ -122,7 +121,7 @@ public class EntityRegistrationService {
      * @param coverImageDark entity cover image for dark mode
      * @return ResponseEntity containing new entity
      */
-    public ResponseEntity<ResponseDTO> registerImages(Long entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
+    public Map<String, Object> registerImages(Long entityId, MultipartFile logo, MultipartFile logoDark, MultipartFile coverImage, MultipartFile coverImageDark) {
         if (logo != null) verifyMediaType(logo.getContentType());
         if (logoDark != null) verifyMediaType(logoDark.getContentType());
         if (coverImage != null) verifyMediaType(coverImage.getContentType());
@@ -139,11 +138,7 @@ public class EntityRegistrationService {
         if (coverImageDark != null)
             entityPreference.setCoverImageDark(uploadToEntityBucket(coverImageDark, entity.getId(), "coverImageDark"));
         Entity entity1 = entityRepository.save(entity);
-        return ResponseEntity.ok(ResponseDTO.builder()
-                .code("00")
-                .message("Registered Successfully")
-                .data(Map.of("entity", entity, "details", entityDetailRepository.findById(entityId).orElseThrow(() -> new RecordNotFoundException("entity details not found")), "preferences", entityPreference))
-                .build());
+        return Map.of("entity", entity, "details", entityDetailRepository.findById(entityId).orElseThrow(() -> new RecordNotFoundException("entity details not found")), "preferences", entityPreference);
     }
 
     /**

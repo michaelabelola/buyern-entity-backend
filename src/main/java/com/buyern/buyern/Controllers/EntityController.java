@@ -1,5 +1,6 @@
 package com.buyern.buyern.Controllers;
 
+import com.buyern.buyern.Models.Entity.Entity;
 import com.buyern.buyern.Services.EntityService;
 import com.buyern.buyern.dtos.ResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class EntityController {
     }
 
     @GetMapping()
-    private ResponseEntity<ResponseDTO> getEntity(@PathVariable Long entityId) {
+    private ResponseEntity<Entity> getEntity(@PathVariable Long entityId) {
         return entityService.getEntityById(entityId);
     }
 

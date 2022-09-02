@@ -52,13 +52,12 @@ public class UserAuthService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseDTO> registerUser(UserDto.UserSignUpDTO userDto) throws HttpMediaTypeNotSupportedException {
+    public ResponseEntity<User> registerUser(UserDto.UserSignUpDTO userDto) throws HttpMediaTypeNotSupportedException {
         userDto.setEmail(userDto.getEmail().toLowerCase());
         if (userAuthRepository.existsByEmail(userDto.getEmail()))
             throw new EntityAlreadyExistsException("Email already registered");
         if (userDto.getProfileImage() == null)
             throw new EntityAlreadyExistsException("profile Image is required");
-        logger.info(userDto.getProfileImage().getContentType());
         if (!Objects.equals(userDto.getProfileImage().getContentType(), MediaType.IMAGE_PNG_VALUE) && !Objects.equals(userDto.getProfileImage().getContentType(), MediaType.IMAGE_JPEG_VALUE) && !Objects.equals(userDto.getProfileImage().getContentType(), MediaType.IMAGE_GIF_VALUE))
             throw new HttpMediaTypeNotSupportedException("file must be an image: png, jpeg, gif");
 
@@ -66,7 +65,7 @@ public class UserAuthService {
         userAuthRepository.save(new UserAuth(savedUser.getId(), savedUser.getEmail(), savedUser.getUid(), SecurityConfiguration.passwordEncoder().encode(userDto.getPassword()), Role.ADMIN));
         User userWithSavedImage = uploadImage(savedUser, userDto.getProfileImage());
 //        ObjectNode oN = new ObjectMapper().createObjectNode().putPOJO("userAuth", userAuth).putPOJO("user", userWithSavedImage);
-        return ResponseEntity.ok(ResponseDTO.builder().code("00").message("SUCCESS").data(userWithSavedImage).build());
+        return ResponseEntity.ok(userWithSavedImage);
     }
 
     @Transactional

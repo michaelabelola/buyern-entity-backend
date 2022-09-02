@@ -73,7 +73,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                 //TODO: get session from redis
                 UserSession userSession = userSessionService.getSession(userId);
 //                logger.info("Server Saved Session: {}",userSession);
-                return new UsernamePasswordAuthenticationToken(userId, null, Authorities.from(List.of("READ", "WRITE")));
+                return new UsernamePasswordAuthenticationToken(userId, null, userSession.getAuthorities());
 
             } catch (Exception ex) {
 //                setResponse(response, "Error Shit");

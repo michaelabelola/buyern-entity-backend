@@ -34,8 +34,8 @@ public class UserSessionService {
     private static final Logger logger = LoggerFactory.getLogger(UserSessionService.class);
     @Value("${jwt.secret}")
     private String SECRET;
-//    @Value("#{new Long('${custom.session.duration}')}")
-    private static Long EXPIRATION_TIME = 86400L;
+    //    @Value("#{new Long('${custom.session.duration}')}")
+    private static Long EXPIRATION_TIME = 2592000L;
     private static final String AUTH_TOKEN_PREFIX = "Bearer ";
     private static final String AUTH_HEADER_STRING = "Authorization";
     private final UserSessionRepository userSessionRepository;
@@ -55,9 +55,9 @@ public class UserSessionService {
                 .withExpiresAt(new Date(System.currentTimeMillis() + (EXPIRATION_TIME * 1000)))
                 .sign(Algorithm.HMAC512(SECRET.getBytes()));
         logger.info(token);
-        response.addHeader(AUTH_HEADER_STRING, String.format("%s%s", AUTH_TOKEN_PREFIX, token));
         if (persist)
             saveSessionToStorage(userAuth, sessionId);
+        response.addHeader(AUTH_HEADER_STRING, String.format("%s%s", AUTH_TOKEN_PREFIX, token));
     }
 
     public void refreshUserSession(String userId, Claim sessionId, HttpServletResponse response, boolean persist) {
@@ -99,6 +99,7 @@ public class UserSessionService {
     public void validateUserSession() {
 
     }
+
     public UserSession getSession(String userId) {
         return userSessionRepository.findById(userId).orElseThrow(() -> {
             logger.info("User Session Not found: try logging");

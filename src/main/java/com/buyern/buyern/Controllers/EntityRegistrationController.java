@@ -3,6 +3,7 @@ package com.buyern.buyern.Controllers;
 import com.azure.core.annotation.BodyParam;
 import com.azure.core.annotation.QueryParam;
 import com.buyern.buyern.Configs.CustomAuthority;
+import com.buyern.buyern.Models.Entity.Entity;
 import com.buyern.buyern.Services.EntityRegistrationService;
 import com.buyern.buyern.dtos.Entity.EntityDto;
 import com.buyern.buyern.dtos.ResponseDTO;
@@ -11,16 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.security.Principal;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -33,7 +32,7 @@ Logger logger = LoggerFactory.getLogger(EntityRegistrationController.class);
     }
 
     @PostMapping("registration/details")
-    private ResponseEntity<ResponseDTO> register1(@Valid @RequestBody EntityDto.EntityRegistrationDto entity, Principal principal, Authentication authentication) {
+    private ResponseEntity<Entity> register1(@Valid @RequestBody EntityDto.EntityRegistrationDto entity, Principal principal, Authentication authentication) {
 //        logger.info(authentication.getPrincipal().toString());
         List<CustomAuthority> authorities = (List<CustomAuthority>) authentication.getAuthorities().stream().toList();
 //        logger.info(String.valueOf(authorities));
@@ -41,9 +40,9 @@ Logger logger = LoggerFactory.getLogger(EntityRegistrationController.class);
     }
 
     @PostMapping("registration/images")
-    private ResponseEntity<ResponseDTO> registeImages(@BodyParam("id") Long id, @Nullable @ModelAttribute MultipartFile logo,
-                                                  @Nullable @ModelAttribute MultipartFile logoDark, @Nullable @ModelAttribute MultipartFile coverImage,
-                                                  @Nullable @ModelAttribute MultipartFile coverImageDark) {
+    private Map<String, Object> registerImages(@BodyParam("id") Long id, @Nullable @ModelAttribute MultipartFile logo,
+                                               @Nullable @ModelAttribute MultipartFile logoDark, @Nullable @ModelAttribute MultipartFile coverImage,
+                                               @Nullable @ModelAttribute MultipartFile coverImageDark) {
 //       preferences
         return entityRegistrationService.registerImages(id, logo, logoDark, coverImage, coverImageDark);
     }
@@ -58,7 +57,7 @@ Logger logger = LoggerFactory.getLogger(EntityRegistrationController.class);
     }
 
     @GetMapping("")
-    private ResponseEntity<ResponseDTO> getEntity(@QueryParam("id") Long id) {
+    private ResponseEntity<Entity> getEntity(@QueryParam("id") Long id) {
         return entityRegistrationService.getEntity(id);
     }
     @GetMapping("/registration/existsByName")
